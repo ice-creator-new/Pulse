@@ -1497,6 +1497,18 @@ struct SettingsView: View {
             // which is not this one, so showing them here would report one
             // Its own group rather than a row under Connection, which is
             // about credentials and routes. This is a notification, and the
+            // Two groups answer two questions about the same money, and
+            // neither belongs in the other. This one is display: the
+            // percentage a balance ring draws cannot say whether it is
+            // counting ¥5 or ¥5,000, so the card prints the figure beside
+            // it — shown by default, and this pane is where somebody who
+            // wants the bare percentage says so.
+            if provider.reportsSpendableBalance {
+                SettingsGroup(String.localized("Detail card")) {
+                    balanceAmountRow(for: account)
+                }
+            }
+
             // general pane's group of them is the wrong home too: the figure
             // is per account, because the providers that report a balance do
             // not price in the same currency.
@@ -1994,6 +2006,24 @@ struct SettingsView: View {
             // Greyed out in a build with no bundle, like every other alert
             // control: `UNUserNotificationCenter` raises without one.
             .disabled(!UsageAlerts.isSupported)
+        }
+    }
+
+    /// The balance figure beside its percentage on the detail card. Display,
+    /// not a notification — its own group above Notifications for that
+    /// reason, gated by the same flag because it is the same subject: money
+    /// an account holds rather than a limit it is spending.
+    private func balanceAmountRow(for account: AccountKey) -> some View {
+        SettingsRow(
+            String.localized("Balance amount"),
+            subtitle: String.localized("Show the money beside the balance's percentage on the detail card.")
+        ) {
+            Toggle("", isOn: Binding(
+                get: { settings.showsBalanceAmount(account) },
+                set: { settings.setShowsBalanceAmount($0, for: account) }
+            ))
+            .labelsHidden()
+            .toggleStyle(.switch)
         }
     }
 

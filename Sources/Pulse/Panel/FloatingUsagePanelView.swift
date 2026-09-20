@@ -113,6 +113,7 @@ struct FloatingUsagePanelView: View {
                             edge: placement.edge,
                             showsRemaining: settings.showsRemaining,
                             showsForecast: settings.showsForecast,
+                            showsBalanceAmount: settings.showsBalanceAmount(selected.account),
                             pointerCenter: pointerCentre(for: index)
                         )
                         .fixedSize()

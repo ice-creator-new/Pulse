@@ -1,5 +1,13 @@
 {
   "code": 0,
-  "message": "success",
-  "data": { "balance": "42.75", "currency": "CNY", "cashBalance": "40.00", "giftBalance": "2.75" }
+  "message": "",
+  "data": {
+    "balance": "42.75",
+    "frozenBalance": "0.00",
+    "currency": "CNY",
+    "overdraftLimit": "0.00",
+    "remainingOverdraftLimit": "0.00",
+    "giftBalance": "2.75",
+    "cashBalance": "40.00"
+  }
 }

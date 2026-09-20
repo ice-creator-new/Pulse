@@ -483,6 +483,9 @@
 "Balance" = "잔액";
 "Warn below" = "잔액 경고선";
 "Notify once when the balance falls under this. Blank for never." = "잔액이 이 값 아래로 내려가면 한 번 알립니다. 비워 두면 알리지 않습니다.";
+"Detail card" = "세부 정보 카드";
+"Balance amount" = "잔액 액수";
+"Show the money beside the balance's percentage on the detail card." = "세부 정보 카드에서 잔액 비율 옆에 금액도 표시합니다。";
 
 // Token spend: every agent's history added up.
 "Token spend" = "토큰 사용량";

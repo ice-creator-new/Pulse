@@ -483,6 +483,9 @@
 "Balance" = "Balance";
 "Warn below" = "Warn below";
 "Notify once when the balance falls under this. Blank for never." = "Notify once when the balance falls under this. Blank for never.";
+"Detail card" = "Detail card";
+"Balance amount" = "Balance amount";
+"Show the money beside the balance's percentage on the detail card." = "Show the money beside the balance's percentage on the detail card.";
 
 // Token spend: every agent's history added up.
 "Token spend" = "Token spend";

@@ -118,6 +118,23 @@ final class AppSettings {
         }
     }
 
+    /// Whether the detail card prints the balance figure beside the balance's
+    /// percentage, per account. **Shown until it is switched off** — a ring at
+    /// 42% cannot say whether that is ¥5 or ¥5,000, and the figure is most of
+    /// what somebody glancing at a purse wants to know.
+    ///
+    /// Keyed by account like `lowBalanceAlerts` for the same reason: these
+    /// providers do not price in the same currency, and an extra account of
+    /// one provider is a different purse again. No `onChange?()` — like
+    /// `showsRemaining`, this redraws whoever read it and refetches nothing:
+    /// the figure is already on this Mac.
+    var showsBalanceAmounts: [String: Bool] {
+        didSet {
+            guard showsBalanceAmounts != oldValue else { return }
+            Self.storeShowsBalanceAmounts(showsBalanceAmounts, in: .standard)
+        }
+    }
+
     /// The order the rail draws them in, as account ids.
     ///
     /// Stored rather than derived so it survives a launch, and resolved through
@@ -681,6 +698,19 @@ final class AppSettings {
         defaults.set(span.rawValue, forKey: Key.spendSpan)
     }
 
+    /// The per-account balance-figure map, taken as an argument rather than
+    /// read from `UserDefaults.standard`, so the round trip can be pinned
+    /// against an isolated suite — the same arrangement `storedSpendSpan`
+    /// has, and `restored()` and the property's `didSet` both go through it,
+    /// so what a test exercises is the one production uses.
+    static func storedShowsBalanceAmounts(in defaults: UserDefaults) -> [String: Bool] {
+        defaults.dictionary(forKey: Key.showsBalanceAmounts) as? [String: Bool] ?? [:]
+    }
+
+    static func storeShowsBalanceAmounts(_ amounts: [String: Bool], in defaults: UserDefaults) {
+        defaults.set(amounts, forKey: Key.showsBalanceAmounts)
+    }
+
     /// The key the chosen span lives under. Internal so a test can store a
     /// value the picker no longer offers and prove the fallback; nothing
     /// outside the module can see it either way.
@@ -887,6 +917,7 @@ final class AppSettings {
         deepSeekBudget: Double? = nil,
         deepSeekCurrency: String? = nil,
         lowBalanceAlerts: [String: Double] = [:],
+        showsBalanceAmounts: [String: Bool] = [:],
         enabledAccounts: Set<String> = Set(Provider.allCases.map(\.rawValue)),
         extraAccounts: [ExtraAccount] = [],
         providerOrder: [String] = [],
@@ -932,6 +963,7 @@ final class AppSettings {
         self.deepSeekBudget = deepSeekBudget
         self.deepSeekCurrency = deepSeekCurrency
         self.lowBalanceAlerts = lowBalanceAlerts
+        self.showsBalanceAmounts = showsBalanceAmounts
         self.enabledAccounts = enabledAccounts
         self.extraAccounts = extraAccounts
         self.providerOrder = providerOrder
@@ -990,6 +1022,19 @@ final class AppSettings {
         var updated = lowBalanceAlerts
         updated[account.id] = amount.flatMap { $0 > 0 ? $0 : nil }
         lowBalanceAlerts = updated
+    }
+
+    /// Whether this account's card carries the figure beside the percentage.
+    /// A missing entry is **on**: showing the money is the default, and it is
+    /// switching it off that is worth remembering.
+    func showsBalanceAmount(_ account: AccountKey) -> Bool {
+        showsBalanceAmounts[account.id] ?? true
+    }
+
+    func setShowsBalanceAmount(_ on: Bool, for account: AccountKey) {
+        var updated = showsBalanceAmounts
+        updated[account.id] = on
+        showsBalanceAmounts = updated
     }
 
     func setSource(_ source: UsageSource, for account: AccountKey) {
@@ -1193,6 +1238,7 @@ final class AppSettings {
             deepSeekBudget: defaults.object(forKey: Key.deepSeekBudget) as? Double,
             deepSeekCurrency: defaults.string(forKey: Key.deepSeekCurrency),
             lowBalanceAlerts: defaults.dictionary(forKey: Key.lowBalanceAlerts) as? [String: Double] ?? [:],
+            showsBalanceAmounts: Self.storedShowsBalanceAmounts(in: defaults),
             enabledAccounts: selection.enabledAccounts,
             extraAccounts: extras,
             providerOrder: defaults.stringArray(forKey: Key.providerOrder) ?? [],
@@ -1317,6 +1363,7 @@ final class AppSettings {
         static let deepSeekBudget = "settings.deepSeekBudget"
         static let deepSeekCurrency = "settings.deepSeekCurrency"
         static let lowBalanceAlerts = "settings.lowBalanceAlerts"
+        static let showsBalanceAmounts = "settings.showsBalanceAmounts"
         static let language = "settings.language"
         static let pinnedWindows = "settings.pinnedWindows"
         static let sources = "settings.sources"

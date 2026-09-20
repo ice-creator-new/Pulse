@@ -191,7 +191,7 @@ The billing period is a **stated length only where the reply gave both ends of i
 
 `plan` is the plan id **tidied, not mapped** — `individual-pro` becomes "Individual Pro". The CLI's own table of display names is a table in a client, so a tier added after this build would be blanked by it, and an unfamiliar name still beats none.
 
-`creditBalance` is the three pots added up, formatted in US dollars — the currency the service prices in, whatever the reader's own is.
+`creditBalance` is the three pots added up, formatted in US dollars — the currency the service prices in, whatever the reader's own is. Its windows are allowances and none of them measures the purse, so with the account pane's **Balance amount** row on (the default) the card prints this figure as a plain "Credit balance" row under them — the row an empty window list gets instead of the percentage the balance-kind rows have.
 
 ## Not offered
 

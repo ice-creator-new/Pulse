@@ -9,12 +9,14 @@ import Foundation
 /// same consequences: Safari's store needs Full Disk Access, and Chromium's
 /// asks for keychain permission once.
 ///
-/// **The ring is the Coding Plan, not the balance.** The account carries two
-/// separate things: a monthly token allowance bought as a plan, and a prepaid
-/// cash balance for anything past it. Only the first has a denominator, so
-/// only the first can be a ring — the balance rides along as money on the
-/// card, the way Command Code's does. An account with no plan is not a fault;
-/// it is an account that buys tokens by the yuan, and it says so.
+/// **Two things on one account, each drawn against its own figure.** The
+/// account carries a monthly token allowance bought as a plan and a prepaid
+/// cash balance for anything past it. The plan's percentage is the platform's
+/// own; the balance has no allowance behind it, so its denominator is the
+/// highest balance Pulse has watched since it last rose — DeepSeek's rule,
+/// carried across whole and labelled as an estimate wherever it is shown.
+/// An account with no plan is not a fault; it is an account that buys tokens
+/// by the yuan, and it says so — or draws its money, when it has any.
 enum XiaomiMiMoError: Error, Equatable {
     case missingCookie
     case invalidCookie
@@ -40,7 +42,12 @@ struct XiaomiMiMoSnapshot: Equatable, Sendable {
         let used: Int
         let limit: Int
         let periodEnd: Date?
-        let code: String?
+        /// The plan's name as Settings shows it: the detail route's
+        /// `planName` when it has one, `planCode` as the fallback. A live
+        /// reply carries both fields side by side — a *name* field is the
+        /// platform's own claim about which is which, and every other
+        /// provider in Pulse shows a name rather than an identifier.
+        let name: String?
     }
 
     let plan: Plan?
@@ -88,8 +95,22 @@ enum XiaomiMiMoCookie {
             let parts = pair.split(separator: "=", maxSplits: 1, omittingEmptySubsequences: false)
             guard parts.count == 2 else { continue }
             let name = parts[0].trimmingCharacters(in: .whitespaces)
-            let value = parts[1].trimmingCharacters(in: .whitespaces)
+            var value = parts[1].trimmingCharacters(in: .whitespaces)
             guard wanted.contains(name) else { continue }
+            // Chrome quotes this platform's serviceToken on the wire, so the
+            // header pasted out of a network tab arrives with a matched pair
+            // around the value — RFC 6265's own spelling of a quoted
+            // cookie-value. Stripped, not refused: the documented paste path
+            // would otherwise reject the platform's own session, and the API
+            // accepts the bare value back (checked against the live route).
+            if value.count >= 2, value.hasPrefix("\""), value.hasSuffix("\"") {
+                value.removeFirst()
+                value.removeLast()
+                value = value.trimmingCharacters(in: .whitespaces)
+            }
+            // A quote that is not wrapping the whole value, a backslash or a
+            // space is still a refusal: structure this parser does not model,
+            // in a header assembled from an arbitrary string.
             guard !value.isEmpty, !value.contains("\""), !value.contains("\\"),
                   !value.contains(" ") else {
                 throw XiaomiMiMoError.invalidCookie
@@ -254,10 +275,13 @@ struct XiaomiMiMoClient: Sendable {
             .flatMap { try? decoder.decode(PlanUsage.self, from: $0) }
             .flatMap { $0.code == 0 ? $0 : nil }
         // `monthUsage.items` is a list because the console draws a row per
-        // bucket; the plan's own allowance is the first. An empty list is an
-        // account with no plan, which is why this returns nil rather than a
-        // zero — a ring at 0% would say "you have a full month left".
-        guard let item = usagePayload?.data?.monthUsage?.items.first, item.limit > 0 else {
+        // bucket; the plan's own allowance is the first. **Null** is what a
+        // live no-plan account answers — `[]` was the guess written to the
+        // contract — and either spelling lands here, decoding to nil rather
+        // than to a zero: a ring at 0% would say "you have a full month
+        // left". An array type that threw on null reached the right answer
+        // only by luck of the `try?` above it.
+        guard let item = usagePayload?.data?.monthUsage?.items?.first, item.limit > 0 else {
             return nil
         }
 
@@ -268,10 +292,14 @@ struct XiaomiMiMoClient: Sendable {
         // Those are not a current allowance, so they are not drawn.
         if detailPayload?.expired == true { return nil }
 
+        // `planName` beside `planCode` on a live reply: the platform keeps a
+        // display name and an identifier as separate fields, and Pulse shows
+        // names — `planCode` stays as the fallback for a reply that carries
+        // only that one.
         return .init(used: item.used,
                      limit: item.limit,
                      periodEnd: detailPayload?.currentPeriodEnd.flatMap(Self.date(from:)),
-                     code: detailPayload?.planCode)
+                     name: detailPayload?.planName ?? detailPayload?.planCode)
     }
 
     static func parseBalance(_ data: Data) throws -> (amount: Double, currency: String)? {
@@ -300,6 +328,8 @@ struct XiaomiMiMoClient: Sendable {
         let data: Body?
         struct Body: Decodable {
             let planCode: String?
+            /// Beside `planCode` on a live reply; null while no plan runs.
+            let planName: String?
             let currentPeriodEnd: String?
             let expired: Bool?
         }
@@ -309,7 +339,12 @@ struct XiaomiMiMoClient: Sendable {
         let code: Int
         let data: Body?
         struct Body: Decodable { let monthUsage: Month? }
-        struct Month: Decodable { let items: [Item] }
+        struct Month: Decodable {
+            /// Null, not `[]`, when the account runs no plan — seen on a
+            /// live reply, where a non-optional array used to throw and
+            /// reach "no plan" only through `try?` swallowing it.
+            let items: [Item]?
+        }
         struct Item: Decodable {
             let name: String?
             let used: Int
@@ -331,42 +366,23 @@ struct XiaomiMiMoUsageService: Sendable {
     let cookie: String?
     var client = XiaomiMiMoClient()
 
+    /// Where this account's watched balance peaks are filed. Its own scope —
+    /// and so its own file — because DeepSeek reads the same mechanism and
+    /// both accounts can be priced in CNY: a peak one provider watched must
+    /// never become the denominator of the other's money.
+    static let baselineScope = "xiaomimimo"
+
     func fetch() async -> ProviderUsage {
         guard let cookie, !cookie.isEmpty else {
             return .unavailable(.xiaomiMiMo, reason: .xiaomiSessionMissing)
         }
         do {
             let snapshot = try await client.fetch(cookie: cookie)
-            guard let plan = snapshot.plan else {
-                // Not a failure: an account can buy tokens by the yuan with no
-                // plan at all. Saying so beats a ring at 0%, which would read
-                // as a full month nobody has.
-                return .unavailable(.xiaomiMiMo, reason: .xiaomiNoCodingPlan)
-            }
-
-            let window = UsageWindow(
-                id: "xiaomi.plan",
-                kind: .monthly,
-                scope: nil,
-                usedFraction: Double(plan.used) / Double(plan.limit),
-                // Thirty days is a **sort key, not a reported length**. The
-                // platform states when the period ends and never how long it
-                // is, and a billing month is not a fixed number of seconds —
-                // so `reportsLength` is false and the window-clock arc and the
-                // forecast leave it alone rather than dividing by a number
-                // nobody stated. Copilot's calendar month is carried the same
-                // way; see `UsageWindow.reportsLength`.
-                windowSeconds: 30 * 86_400,
-                resetsAt: plan.periodEnd,
-                reportsLength: false,
-                isExhausted: plan.used >= plan.limit)
-
-            return .init(account: AccountKey(.xiaomiMiMo),
-                         windows: [window],
-                         observedAt: Date(),
-                         state: .live,
-                         plan: plan.code,
-                         creditBalance: Self.money(snapshot))
+            // Advance the watched peak here, on success, before the reading is
+            // built — the same place and the same order `DeepSeekUsageService`
+            // does it, so `reading(from:peak:)` can stay a pure mapping and
+            // the tests never write into the marks of whoever runs them.
+            return Self.reading(from: snapshot, peak: Self.advanceBaseline(for: snapshot))
         } catch let error as XiaomiMiMoError {
             let reason: ProviderUsage.Unavailability = switch error {
             case .missingCookie, .invalidCookie: .xiaomiSessionMissing
@@ -383,10 +399,136 @@ struct XiaomiMiMoUsageService: Sendable {
         }
     }
 
-    /// The prepaid balance as a line on the card. A display string rather than
-    /// a `creditRemaining`, because there is no allowance to compare it
-    /// against — `reportsSpendableBalance` stays false and no "warn below"
-    /// line is offered for something Pulse cannot say is running out.
+    /// What this reading's balance does to the watched peak, and the
+    /// denominator it leaves behind.
+    ///
+    /// A balance that went **up** can only be a top-up, and that resets the
+    /// mark; anything else leaves it alone. The first sight sets it, so the
+    /// balance row reads 0% until money is actually spent — a true statement
+    /// about what Pulse has seen rather than a figure anyone made up.
+    ///
+    /// Nil when the balance route did not answer: no money means nothing to
+    /// measure and nothing written. Production is the only caller — see
+    /// `fetch()` above for why this does not live in `reading(from:peak:)`.
+    static func advanceBaseline(
+        for snapshot: XiaomiMiMoSnapshot, at now: Date = Date()
+    ) -> Double? {
+        guard let purse = remaining(snapshot) else { return nil }
+
+        var marks = DeepSeekBaseline.marks(scope: baselineScope)
+        let mark = DeepSeekBaseline.advanced(marks[purse.currency], seeing: purse.amount, at: now)
+        if marks[purse.currency] != mark {
+            marks[purse.currency] = mark
+            DeepSeekBaseline.store(marks, scope: baselineScope)
+        }
+        return mark.peak
+    }
+
+    /// What one snapshot of the console says the panel should draw.
+    ///
+    /// **A session that answered is not the same as an account with a plan.**
+    /// An account that buys tokens by the yuan has no Coding Plan and still
+    /// has money on it — that money is a whole reading on its own, and an
+    /// account with a plan has money on it too, for whatever runs past the
+    /// allowance. So the balance is a window in its own right rather than a
+    /// line that only appears when the plan is missing, and an account with
+    /// neither still says so rather than drawing an empty live reading.
+    ///
+    /// `peak` is the watched balance peak for this account's currency (see
+    /// `advanceBaseline(for:)`), nil where there is no balance to measure.
+    /// A balance of zero is still money: it keeps `creditBalance` and the
+    /// card's plain figure even though there is no window to draw — an
+    /// account that has spent everything is not one Pulse failed to read.
+    static func reading(
+        from snapshot: XiaomiMiMoSnapshot, now: Date = Date(), peak: Double?
+    ) -> ProviderUsage {
+        let money = Self.money(snapshot)
+        var windows = snapshot.plan.map { [Self.planWindow($0)] } ?? []
+        if let window = Self.balanceWindow(snapshot, peak: peak) { windows.append(window) }
+
+        // Nothing to draw and nothing to show: no plan and no balance is
+        // still a complete answer about the subscription, not a fault.
+        guard !windows.isEmpty || money != nil else {
+            return .unavailable(.xiaomiMiMo, reason: .xiaomiNoCodingPlan)
+        }
+
+        return .init(account: AccountKey(.xiaomiMiMo),
+                     windows: windows,
+                     observedAt: now,
+                     state: .live,
+                     plan: snapshot.plan?.name,
+                     creditBalance: money,
+                     creditRemaining: Self.remaining(snapshot))
+    }
+
+    /// The Coding Plan's month, as the one window whose length nobody stated.
+    private static func planWindow(_ plan: XiaomiMiMoSnapshot.Plan) -> UsageWindow {
+        UsageWindow(
+            id: "xiaomi.plan",
+            kind: .monthly,
+            scope: nil,
+            usedFraction: Double(plan.used) / Double(plan.limit),
+            // Thirty days is a **sort key, not a reported length**. The
+            // platform states when the period ends and never how long it
+            // is, and a billing month is not a fixed number of seconds —
+            // so `reportsLength` is false and the window-clock arc and the
+            // forecast leave it alone rather than dividing by a number
+            // nobody stated. Copilot's calendar month is carried the same
+            // way; see `UsageWindow.reportsLength`.
+            windowSeconds: 30 * 86_400,
+            resetsAt: plan.periodEnd,
+            reportsLength: false,
+            isExhausted: plan.used >= plan.limit)
+    }
+
+    /// The prepaid balance as a row of its own, measured against the highest
+    /// balance Pulse has watched in this currency since it last rose.
+    ///
+    /// **The denominator is a figure Pulse watched, not one it made up** — the
+    /// platform reports money and no allowance to take a percentage of, which
+    /// is the hole DeepSeek's `sinceTopUp` fills the same way. The row carries
+    /// `estimate`, so the card and `--json` both say the figure was inferred
+    /// rather than reporting it as the platform's.
+    ///
+    /// What it costs is the first run: no mark yet means the first balance
+    /// *becomes* the mark and the row reads 0% until money is spent. A peak of
+    /// zero — an account that has never held any credit — draws no row at all:
+    /// never having had money is not the same as having spent it. Nil `peak`
+    /// (no balance route answered) is neither of those; the money is carried
+    /// as `creditBalance` and no fraction is drawn against nothing.
+    ///
+    /// **The plan draws first and the rail picks the fuller of the two** — the
+    /// usual headline rule, so whichever of month-tokens or money will bite
+    /// first gets the ring, and the other keeps its row on the card.
+    private static func balanceWindow(
+        _ snapshot: XiaomiMiMoSnapshot, peak: Double?
+    ) -> UsageWindow? {
+        guard let purse = remaining(snapshot), let peak,
+              let fraction = DeepSeekBaseline.usedFraction(balance: purse.amount, peak: peak)
+        else { return nil }
+
+        return UsageWindow(
+            id: "xiaomi.balance",
+            kind: .balance,
+            // Not the scope: `--json` promises that reads the same in every
+            // language, and the wording that marks this inferred is localized.
+            scope: nil,
+            usedFraction: fraction,
+            // A prepaid balance does not turn over, so there is no reset and no
+            // length — the seconds exist to sort the row under the month.
+            windowSeconds: 30 * 86_400,
+            resetsAt: nil,
+            reportsLength: false,
+            estimate: .sinceTopUp)
+    }
+
+    /// The prepaid balance as a line on the card, beside the row that draws a
+    /// fraction of it. A display string for the body; `remaining(_:)` carries
+    /// the same figure as a number, and `balanceWindow(_:peak:)` is what turns
+    /// it into a row of its own.
+    ///
+    /// This is the **exact** figure and the window is the glance: the row
+    /// needed a denominator Pulse could stand behind, the card did not.
     private static func money(_ snapshot: XiaomiMiMoSnapshot) -> String? {
         guard let balance = snapshot.balance, let currency = snapshot.currency else { return nil }
         let formatter = NumberFormatter()
@@ -394,5 +536,15 @@ struct XiaomiMiMoUsageService: Sendable {
         formatter.currencyCode = currency
         formatter.locale = LocalizationSource.locale
         return formatter.string(from: NSNumber(value: balance))
+    }
+
+    /// The same figure as a number and a currency: the key the watched peak
+    /// is filed under (one per currency, in this provider's own file), and —
+    /// through `reportsSpendableBalance` — the thing a "warn below" line
+    /// compares against. Nil where the route did not answer, which is the
+    /// line between no balance and a balance of zero.
+    private static func remaining(_ snapshot: XiaomiMiMoSnapshot) -> ProviderUsage.CreditAmount? {
+        guard let balance = snapshot.balance, let currency = snapshot.currency else { return nil }
+        return .init(amount: balance, currency: currency)
     }
 }

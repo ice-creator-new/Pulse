@@ -99,6 +99,10 @@ struct UsageDetailCard: View {
     var showsRemaining: Bool = false
     /// Say whether each limit will last its window.
     var showsForecast: Bool = false
+    /// Print the account's money beside the balance's percentage. On unless
+    /// the reader switched it off in the account's pane — a ring at 42%
+    /// cannot say whether that is ¥5 or ¥5,000.
+    var showsBalanceAmount: Bool = false
     /// Where the pointer's tip should sit along the side facing the rail,
     /// measured from the card's own top or leading edge. The card gets pushed
     /// around by the panel's own edges (see
@@ -123,6 +127,8 @@ struct UsageDetailCard: View {
                     progress: showsRemaining ? window.remainingFraction : window.usedFraction,
                     accent: window.tint(warningAt: warningThreshold),
                     percentageText: window.percentText(remaining: showsRemaining),
+                    balanceFigure: Self.balanceFigure(
+                        for: window, credit: usage.creditBalance, enabled: showsBalanceAmount),
                     isSpent: UsageTint.isSpent(window),
                     showsRemaining: showsRemaining,
                     // Every provider, not a chosen few: what this needs is a
@@ -140,6 +146,17 @@ struct UsageDetailCard: View {
             // reports money and no limits *by design*, and the money is then
             // the whole reading — so it is what the card says.
             if usage.windows.isEmpty, let balance = usage.creditBalance {
+                ValueRow(title: String.localized("Credit balance"), value: balance)
+            }
+
+            // Command Code's money has no balance window to ride on — its
+            // windows are allowances — so with the figure asked for it gets
+            // the plain money row beneath them, which is the row an empty
+            // window list gets above. Where a balance window exists the
+            // figure is already on that row's percentage line, and where the
+            // list is empty the block just above has said it.
+            if showsBalanceAmount, let balance = usage.creditBalance,
+               !usage.windows.isEmpty, !usage.windows.contains(where: { $0.kind == .balance }) {
                 ValueRow(title: String.localized("Credit balance"), value: balance)
             }
 
@@ -195,6 +212,16 @@ struct UsageDetailCard: View {
         case .right: .trailing
         case .top: .top
         }
+    }
+
+    /// The money beside one row's percentage — and only on the row that
+    /// measures the balance. `kind == .balance` is where a purse has a ring
+    /// to sit beside; a plan's fraction counts tokens and has no money
+    /// behind it. With the reader's switch off, or with no money reported,
+    /// the figure stays the percentage alone.
+    static func balanceFigure(for window: UsageWindow, credit: String?, enabled: Bool) -> String? {
+        guard enabled, window.kind == .balance else { return nil }
+        return credit
     }
 
     /// Whether the body would otherwise be nothing but the header.
@@ -305,6 +332,9 @@ private struct ProgressMetricRow: View {
     let progress: Double
     let accent: Color
     let percentageText: String
+    /// The account's money to print beside the percentage, and only on the
+    /// balance's own row — see `UsageDetailCard.balanceFigure`.
+    var balanceFigure: String?
     let isSpent: Bool
     /// Which way the figure beside the bar is counted, so the word next to it
     /// can agree with it.
@@ -317,6 +347,28 @@ private struct ProgressMetricRow: View {
         showsRemaining
             ? .localized("\(percentageText) Left")
             : .localized("\(percentageText) Used")
+    }
+
+    /// The percentage, and — where this row *is* the balance and the reader
+    /// wants it — the money beside it. Plain concatenation rather than a
+    /// localized format: both halves are already localized and the joiner is
+    /// punctuation with no words in it. The balance row's reset text is
+    /// always empty — money never turns over — so nothing competes for the
+    /// rest of this line.
+    private var figureLine: String {
+        guard let balanceFigure else { return figureLabel }
+        return figureLabel + " · " + balanceFigure
+    }
+
+    /// What VoiceOver gets, built outside the call like `figureLabel`:
+    /// `Scripts/localization-keys.py` reads a conditional inside `.localized`
+    /// as its bare tail and would miss the key the wrong branch names.
+    private var spokenFigure: String {
+        let base = showsRemaining
+            ? String.localized("\(percentageText) left. \(resetDescription)")
+            : String.localized("\(percentageText) used. \(resetDescription)")
+        guard let balanceFigure else { return base }
+        return base + ", " + balanceFigure
     }
 
     var body: some View {
@@ -347,7 +399,7 @@ private struct ProgressMetricRow: View {
                 // `Scripts/localization-keys.py` reads a conditional there as
                 // the bare tail — "Left" — which matched an unrelated key and
                 // let a missing one through the check that exists to catch it.
-                Text(figureLabel)
+                Text(figureLine)
                     .font(.system(size: DetailCardLayout.rowFontSize, weight: .medium, design: .rounded))
                     .foregroundStyle(isSpent ? Color.pulseExhausted : .primary.opacity(0.9))
 
@@ -364,11 +416,7 @@ private struct ProgressMetricRow: View {
         }
         .accessibilityElement(children: .ignore)
         .accessibilityLabel(title)
-        .accessibilityValue(
-            showsRemaining
-                ? String.localized("\(percentageText) left. \(resetDescription)")
-                : String.localized("\(percentageText) used. \(resetDescription)")
-        )
+        .accessibilityValue(spokenFigure)
     }
 }
 

@@ -119,7 +119,7 @@ Pulse 只呈現各服務回報的數字，每個百分比都來自那份回覆�
 | **Command Code** | 貼上的金鑰，否則使用 `cmd auth login` 已儲存的登入 | 以美元計價的額度餘額；每月方案列標示為**估算** |
 | **DeepSeek** | 貼上的金鑰；官方文件化的 `GET /user/balance` | 僅有預付餘額、沒有額度；圓環要對照什麼由你決定 |
 | **Devin** | 無需輸入——讀取你的瀏覽器工作階段，無需鑰匙圈授權 | Devin 回報的每日與每週額度。沒有瀏覽器工作階段或貼上的憑證時，讀取應用程式存下的帶日期方案。端點失敗時只使用相符的端點快取，保留帳號與組織界線（[Docs/providers/devin.md](Docs/providers/devin.md)） |
-| **小米 Coding Plan** | 無需輸入——讀取瀏覽器中已登入的工作階段，也可以手動貼上 `Cookie:` 標頭 | 小米 MiMo 主控台上的月度 token 額度，有結束時間就一併顯示。預付餘額會附在卡片上。帳號上沒有 Coding Plan 時會直接說明，而不是畫一個 0%（[Docs/providers/xiaomi-coding-plan.md](Docs/providers/xiaomi-coding-plan.md)） |
+| **小米 Coding Plan** | 無需輸入——讀取瀏覽器中已登入的工作階段，也可以手動貼上 `Cookie:` 標頭 | 小米 MiMo 主控台上的月度 token 額度，有結束時間就一併顯示；預付餘額自成一列——以 Pulse 觀察到的最高餘額為分母，標示為估算——並可為它設定「餘額低於」提醒。帳號上既沒有方案也沒有餘額時會直接說明，而不是畫一個 0%（[Docs/providers/xiaomi-coding-plan.md](Docs/providers/xiaomi-coding-plan.md)） |
 
 ---
 

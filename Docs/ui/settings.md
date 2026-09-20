@@ -39,6 +39,8 @@ The usage-interval group is named **Refresh**, not Updates.
 
 An account pane grows a **Notifications** group of its own where `Provider.reportsSpendableBalance` is true — a "warn below" figure in money. Not a row under Connection, which is about credentials and routes, and not in the general pane's Notifications group either: the figure is per account, because the providers that report a balance do not price in the same currency. [../notifications.md](../notifications.md)
 
+Above it, the same flag grows a **Detail card** group with one row — **Balance amount**, on by default — which prints the account's money beside the balance's percentage on the card (`42% Used · ¥42.75`). Display rather than a notification, which is why it is its own group and not a row under the one below: the percentage of a purse cannot say whether it is counting ¥5 or ¥5,000, and somebody who wants the bare percentage switches the figure off here. A provider whose money has no balance window (Command Code's) gets the card's plain "Credit balance" row instead — the row an empty window list already has. The per-account map is `AppSettings.showsBalanceAmounts`, on-by-default like the figure it governs.
+
 The general pane's **Notifications** group's three controls are not independent of each other: the reset toggle is greyed out while the threshold is Off, because a reset is only announced for a window that was warned about, and every control is greyed out in an unbundled build. Its subtitle reports `UNAuthorizationStatus`, not the switches. Rules: [../notifications.md](../notifications.md).
 
 ## Controls

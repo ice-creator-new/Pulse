@@ -80,15 +80,22 @@ enum DeepSeekBaseline {
 
     // MARK: - Disk
 
-    /// Marks by currency code. Small, and rewritten every refresh, so it is
-    /// read and written whole.
-    static func marks() -> [String: Mark] {
-        guard let data = try? Data(contentsOf: file) else { return [:] }
+    /// Marks by currency code, for one **scope**. Small, and rewritten every
+    /// refresh, so it is read and written whole.
+    ///
+    /// The scope is what keeps two providers' money apart. Xiaomi's balance
+    /// reads this same mechanism, and both accounts can hold CNY — a peak
+    /// DeepSeek watched would otherwise become the denominator of Xiaomi's
+    /// money and a Xiaomi top-up would restart DeepSeek's ring. Each gets its
+    /// own file, named for the scope, so `deepseek-baseline.json` keeps
+    /// whatever it already holds and nothing has to be migrated.
+    static func marks(scope: String = "deepseek") -> [String: Mark] {
+        guard let data = try? Data(contentsOf: file(scope: scope)) else { return [:] }
         return (try? JSONDecoder().decode([String: Mark].self, from: data)) ?? [:]
     }
 
-    static func store(_ marks: [String: Mark]) {
-        let destination = file
+    static func store(_ marks: [String: Mark], scope: String = "deepseek") {
+        let destination = file(scope: scope)
         disk.async {
             PulseStorage.prepare()
             guard let data = try? JSONEncoder().encode(marks) else { return }
@@ -98,10 +105,12 @@ enum DeepSeekBaseline {
 
     /// Off the main thread, and serial so two refreshes cannot land out of
     /// order — the same arrangement `UsageAlerts` writes its memory with, and
-    /// for the same reason: this is written on every pass.
-    private static let disk = DispatchQueue(label: "Pulse.deepseek", qos: .utility)
+    /// for the same reason: this is written on every pass. One queue for
+    /// every scope: the files differ, so nothing contends, and a single
+    /// label beats a queue per provider that nothing ever looks at.
+    private static let disk = DispatchQueue(label: "Pulse.baseline", qos: .utility)
 
-    private static var file: URL {
-        PulseStorage.directory.appending(path: "deepseek-baseline.json")
+    private static func file(scope: String) -> URL {
+        PulseStorage.directory.appending(path: "\(scope)-baseline.json")
     }
 }

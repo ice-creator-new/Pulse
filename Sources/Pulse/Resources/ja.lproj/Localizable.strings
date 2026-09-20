@@ -483,6 +483,9 @@
 "Balance" = "残高";
 "Warn below" = "残高の警告ライン";
 "Notify once when the balance falls under this. Blank for never." = "残高がこれを下回ったときに 1 回通知します。空欄なら通知しません。";
+"Detail card" = "詳細カード";
+"Balance amount" = "残高の金額";
+"Show the money beside the balance's percentage on the detail card." = "詳細カードで残高のパーセンテージの横に金額も表示します。";
 
 // Token spend: every agent's history added up.
 "Token spend" = "トークン使用量";

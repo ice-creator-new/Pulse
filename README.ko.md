@@ -119,7 +119,7 @@ Pulse는 각 서비스가 보고하는 숫자를 그대로 보여 줍니다. 화
 | **Command Code** | 붙여 넣은 키, 없으면 `cmd auth login`이 이미 저장한 로그인 | 달러 단위 크레딧 잔액. 월간 플랜 행은 **추정**으로 표시 |
 | **DeepSeek** | 붙여 넣은 키. 문서화된 `GET /user/balance` | 선불 잔액만 있고 한도는 없음. 링이 무엇을 기준으로 삼을지는 사용자가 선택 |
 | **Devin** | 입력할 것이 없음——브라우저 세션을 읽고 키체인 프롬프트도 없음 | Devin이 보고하는 일간·주간 한도. 브라우저 세션이나 붙여 넣은 자격 증명이 없으면 앱이 저장한 날짜별 플랜을 읽음. 엔드포인트 실패 시 일치하는 엔드포인트 캐시만 사용해 계정과 조직 경계를 유지([Docs/providers/devin.md](Docs/providers/devin.md)) |
-| **Xiaomi Coding Plan** | 입력할 것이 없음——로그인된 브라우저 세션을 읽음. `Cookie:` 헤더를 붙여 넣을 수도 있음 | Xiaomi MiMo 콘솔의 월간 토큰 한도. 기간 종료가 보고되면 함께 표시. 선불 잔액은 카드에 한 줄로 덧붙음. 플랜이 없는 계정은 0%를 그리지 않고 그렇다고 알림([Docs/providers/xiaomi-coding-plan.md](Docs/providers/xiaomi-coding-plan.md)) |
+| **Xiaomi Coding Plan** | 입력할 것이 없음——로그인된 브라우저 세션을 읽음. `Cookie:` 헤더를 붙여 넣을 수도 있음 | Xiaomi MiMo 콘솔의 월간 토큰 한도. 기간 종료가 보고되면 함께 표시. 선불 잔액은 별도의 한 행이 되며 Pulse가 관측한 최고 잔액을 기준으로 삼고 추정치로 표시. "이 값 아래로 알림"도 설정할 수 있음. 플랜도 잔액도 없는 계정은 0%를 그리지 않고 그렇게 알림([Docs/providers/xiaomi-coding-plan.md](Docs/providers/xiaomi-coding-plan.md)) |
 
 ---
 

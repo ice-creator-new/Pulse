@@ -1,9 +1,16 @@
 {
   "code": 0,
-  "message": "success",
+  "message": "",
   "data": {
     "planCode": "coding-pro",
+    "planName": "Coding Pro",
     "currentPeriodEnd": "2026-10-01 00:00:00",
-    "expired": false
+    "expired": false,
+    "enableAutoRenew": false,
+    "autoRenewDiscount": "0.88",
+    "hasAutoRenewSubscribed": false,
+    "clawEnabled": false,
+    "clawPeriodEnd": null,
+    "clawPurchased": false
   }
 }

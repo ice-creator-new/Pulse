@@ -76,7 +76,7 @@ The rail's label is budgeted for "100%" — 38pt. Money is bounded by nothing: �
 
 `CreditAmount.railText(locale:)` is the short form — `¥9.4`, `¥5k`, `¥123k`, `$1.2M` — with the **narrow** symbol, which is what turns "CN¥" back into "¥". It is **truncated, never rounded**: a balance shown as more than it is is the wrong way to be wrong, and it settles the rollover for free (999,999 is `¥999k`, not the `¥1,000k` that rounding to one place produced). Cents survive below a hundred, where they are the part somebody might be watching.
 
-The exact figure is a hover away and is also in Settings. `RailMoneyTests` pins the forms and measures every one of them against the rail's own thickness.
+The exact figure is a hover away, is also in Settings, and — through the account pane's **Balance amount** row, on by default — sits on the card beside the balance's percentage. `RailMoneyTests` pins the forms and measures every one of them against the rail's own thickness.
 
 ### A reading with no windows is still a reading
 
@@ -85,6 +85,8 @@ The exact figure is a hover away and is also in Settings. `RailMoneyTests` pins 
 **The read path needed it too, and was missed the first time.** `reading(for:)` had the same `!windows.isEmpty` guard, so a banked balance-only reading could be written and never come back out: blank through the first round trip after launch, no fallback when a fetch failed, and `--json` reporting a null balance. `Stored` also gained `creditRemaining`, or the restored reading falls back to the long currency string on the rail.
 
 Marks live in `deepseek-baseline.json` in Pulse's Application Support folder, **one per currency**, written off the main thread on a serial queue — the same arrangement `UsageAlerts` writes its memory with, and for the same reason: this is written on every pass. The mark is advanced on every reading whichever mode is in force, so switching to `sinceTopUp` later finds a peak already there rather than starting over from whatever the balance happens to be that afternoon.
+
+The store is **scoped by provider as well as currency**: `DeepSeekBaseline.marks(scope:)` names the file, and Xiaomi's balance reads the same mechanism under its own scope (`xiaomimimo-baseline.json`). Both accounts can hold CNY, and a peak one of them watched must never become the denominator of the other's money — see [xiaomi-coding-plan.md](xiaomi-coding-plan.md).
 
 ### `budget` is the reader's own line
 

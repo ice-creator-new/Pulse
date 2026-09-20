@@ -1,5 +1,5 @@
 {
   "code": 0,
-  "message": "success",
-  "data": { "monthUsage": { "percent": 0, "items": [] } }
+  "message": "",
+  "data": { "monthUsage": { "percent": 0, "items": null }, "usage": null }
 }

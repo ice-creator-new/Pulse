@@ -119,7 +119,7 @@ Pulse は各サービスが報告する数字をそのまま表示します。�
 | **Command Code** | 貼り付けたキー、または `cmd auth login` がすでに保存したログイン | ドル建てのクレジット残高。月次プランの行は**推定**と表示 |
 | **DeepSeek** | 貼り付けたキー。文書化された `GET /user/balance` | 前払い残高のみで枠はなし。リングが何を基準にするかはあなたが選ぶ |
 | **Devin** | 入力は不要——ブラウザのセッションを読み取り、キーチェーンの確認も出ない | Devin が報告する日次・週次の枠。ブラウザセッションも貼り付けた認証情報もない場合は、アプリが保存した日付付きプランを読み取る。エンドポイント障害時は一致するエンドポイントのキャッシュのみを使い、アカウントと組織の境界を保つ（[Docs/providers/devin.md](Docs/providers/devin.md)） |
-| **Xiaomi Coding Plan** | 入力は不要——サインイン済みのブラウザセッションを読み取る。`Cookie:` ヘッダーを貼り付けることもできる | Xiaomi MiMo コンソールの月間トークン枠。期間の終了が報告されていればそれも表示する。前払い残高はカードに 1 行として並ぶ。プランのないアカウントは 0% を描かず、そう述べる（[Docs/providers/xiaomi-coding-plan.md](Docs/providers/xiaomi-coding-plan.md)） |
+| **Xiaomi Coding Plan** | 入力は不要——サインイン済みのブラウザセッションを読み取る。`Cookie:` ヘッダーを貼り付けることもできる | Xiaomi MiMo コンソールの月間トークン枠。期間の終了が報告されていればそれも表示する。前払い残高は独立した 1 行になり、Pulse が観測した最高残高を分母にして推定と表示される。「これより少なくなると通知」も設定できる。プランも残高もないアカウントは 0% を描かず、そう述べる（[Docs/providers/xiaomi-coding-plan.md](Docs/providers/xiaomi-coding-plan.md)） |
 
 ---
 
