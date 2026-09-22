@@ -50,7 +50,7 @@ Guards:
 
 Releasing a stalled pass is not ending it. Abandoned work still writes when it answers. Every pass is stamped (`generation` / `currentPass`) and must still be current before writing `usage` or clearing flags.
 
-Disabled providers are not fetched by the loop or by opening their Settings pane. After initial setup, a deliberate refresh can still ask that account by name. Automatic history loading is restricted to enabled primary accounts, and Codex's account-history method checks the primary account is enabled before starting its helper.
+Disabled providers are not fetched by the loop, by opening their Settings pane, or by a per-account refresh call. The pane replaces its live rows with **Not shown** and disables diagnostics Retry until the account is enabled. Automatic history loading is restricted to enabled primary accounts, and Codex's account-history method checks the primary account is enabled before starting its helper.
 
 `windowSeconds` is not evidence that a length was reported. `UsageWindow.reportsLength` distinguishes a real duration from a sort key. The window-clock arc and burn-rate divide only when the length was actually stated.
 
@@ -80,6 +80,10 @@ The copied diagnostic report is a fixed allowlist: app version, provider, primar
 ## Agent activity
 
 A white arc inside the ring while that provider’s CLI is working (`AgentActivity`), polled every 2s on its **own** clock. Usage moves in percent; a turn starts and finishes in seconds.
+
+The scanner receives the providers represented by enabled accounts and reads only those with local transcripts (Claude Code and Codex). With neither selected, no activity timer or scan runs. Activity remains per provider, including when only an added account is enabled: the local transcripts do not identify the Pulse account. This is independent of the Token Spend setting.
+
+Changing the monitored providers cancels the previous scan and starts a new observation. Directory walks and tail reads check cancellation between files; a read already in progress may finish, but its result cannot restore activity or overwrite the new scan. Stopping clears `running`, `lastWrite` and `finishedAt` without treating deselection or hiding the panel as a finished turn.
 
 “Working” is not “written to recently.” Both CLIs state the answer in the **tail** of live transcripts. Rules of thumb (detail and historical measurements: [providers/README.md](providers/README.md) and [decisions/reported-figures.md](decisions/reported-figures.md)):
 

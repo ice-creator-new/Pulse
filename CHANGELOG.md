@@ -7,6 +7,42 @@ shows in the update window — see [Scripts/changelog.py](Scripts/changelog.py).
 Add the entry **before** tagging, in the small grammar the converter knows:
 bullets, `**bold**`, `` `code` `` and `[links](https://example.com)`.
 
+## 1.3.1
+
+**中文**
+
+**新功能**
+
+- **Kiro 成为第二十个服务商。** Pulse 通过 Kiro CLI 自带的 ACP 接口读取当前账号的方案与额度，无需额外登录或复制凭据；同一响应里的多个额度会分别显示，并保持稳定的账号身份。
+- **浮动栏可以贴合刘海。** 顶部停靠时会围住刘海并延伸到屏幕边缘，在有刘海和无刘海的屏幕间移动时自动采用对应形状；警报提示改画在刘海下方，不会再被屏幕缺口遮住。
+- **菜单栏图标可以隐藏。** 可只用浮动栏或全局快捷键进入 Pulse。设置会保证始终至少留有一个可用入口；`Command-,` 也会直接打开设置。
+- **更多外观与动画开关。** 可关闭浮动栏警报颜色、CLI 活动动画和刷新动画，并让浮动栏两端保持与圆环一致的柔和曲线。
+
+**改进与修复**
+
+- **未选择显示的服务不会再偷偷读取。** Pulse 只扫描已监控服务的本机 CLI 活动；关闭显示的服务在设置里明确标为“未显示”，也无法从诊断页触发刷新。
+- **Kiro 额度顺序变化不再打乱账号。** 额度身份改用 Kiro 返回的资源类型，不再依赖数组位置，因此重排后仍会保留各自的显示设置和历史。
+- **修复辅助进程重启后的错误超时。** Codex 和 Kiro 的旧请求计时器不会再结束新一轮同编号请求，也不会让已经完成的请求留下延迟报错。
+- **隐藏菜单栏图标时不会把自己锁在应用外。** 如果浮动栏不可用且快捷键没有成功注册，Pulse 会自动恢复菜单栏入口；首次选择服务前也不会允许隐藏唯一入口。
+- **修正 GLM 服务图标与发布构建检查。** 两个 GLM 区域使用一致的服务标识；构建命令不再重复覆盖 Swift 语言模式，避免把无效警告当作发布失败。
+
+**English**
+
+**New**
+
+- **Kiro is the twentieth provider.** Pulse reads the current plan and allowances through the ACP service built into Kiro CLI, with no extra sign-in or copied credential. Multiple allowances in one response remain separate and keep stable account identities.
+- **The rail can berth around the notch.** A top-docked rail wraps the notch and reaches the screen edge, adapting as it moves between displays with and without a notch. Its alert cue is drawn below the cutout where it remains visible.
+- **The menu bar icon can be hidden.** Pulse can be reached through the floating rail or global shortcuts alone. Settings always preserve at least one working entry point, and `Command-,` opens Settings directly.
+- **More appearance and motion controls.** The docked alert colour, CLI activity animation and refresh animation can each be disabled, while the rail can keep ends softened to the rings' own curve.
+
+**Changed and fixed**
+
+- **Providers that are not selected are no longer read.** Pulse scans local CLI activity only for watched providers. A hidden provider is labelled “Not shown” in Settings and cannot be refreshed from diagnostics.
+- **Kiro allowance ordering no longer changes account identity.** Allowances use the resource type returned by Kiro instead of their array position, preserving display choices and history when the response is reordered.
+- **Fixed false timeouts after helper restarts.** Old Codex and Kiro request timers can no longer finish a newer request that reused the same identifier, or report a late failure after a request already completed.
+- **Hiding the menu bar icon cannot lock the user out.** Pulse restores the menu bar entry if the rail is unavailable and no shortcut registered successfully, and keeps the sole entry visible until the first provider selection is complete.
+- **Corrected the GLM provider marks and the release build check.** Both GLM regions now use a consistent provider identity, and build commands no longer override the package's Swift language mode and turn a redundant warning into a failed release.
+
 ## 1.3.0
 
 **中文**

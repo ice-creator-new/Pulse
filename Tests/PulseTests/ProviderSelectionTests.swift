@@ -126,10 +126,10 @@ struct ProviderSelectionTests {
     @Test("Detection includes user Applications and an empty CLI directory")
     func appAndDirectoryDiscovery() {
         let home = URL(fileURLWithPath: "/synthetic-home")
-        let paths = Set([".codex", "Applications/Grok Bot.app", "Applications/Antigravity.app", ".claude"]
+        let paths = Set([".codex", ".kiro", "Applications/Grok Bot.app", "Applications/Antigravity.app", ".claude"]
             .map { home.appending(path: $0).path })
         #expect(Provider.installedOnThisMac(home: home, exists: paths.contains)
-            == [.codex, .grokBot, .antigravity, .claudeCode])
+            == [.codex, .kiro, .grokBot, .antigravity, .claudeCode])
     }
 
     @Test("Before selection every store entry point stays idle")
@@ -149,6 +149,18 @@ struct ProviderSelectionTests {
         #expect(settings.needsProviderSelection)
         settings.selectProviders([])
         #expect(settings.needsProviderSelection)
+    }
+
+    @Test("A disabled provider cannot be fetched from its settings pane")
+    @MainActor
+    func disabledProviderStaysIdle() {
+        let settings = AppSettings(enabledAccounts: [Provider.codex.rawValue])
+        let store = UsageStore(settings: settings)
+
+        store.refresh(AccountKey(.kiro))
+
+        #expect(!store.isRefreshing)
+        #expect(store.diagnostics.isEmpty)
     }
 
     @Test("A chosen ring cannot be switched off into an empty rail")
