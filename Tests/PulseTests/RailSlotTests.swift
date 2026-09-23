@@ -50,8 +50,12 @@ struct RailSlotTests {
         let names = AppSettings(providerOrder: []).orderedAccounts.map(\.provider.displayName)
 
         #expect(names == names.sorted { $0.localizedStandardCompare($1) == .orderedAscending })
-        #expect(names.first == "Antigravity")
         #expect(names.count == Provider.allCases.count)
+        // "Antigravity" is the first *Latin* name under Finder's collation.
+        // A CJK product name may sort above the whole Latin run on this Mac
+        // — 小米API does on a Chinese locale — so the head is not pinned to
+        // one string across locales.
+        #expect(names.first { $0.first?.isASCII == true } == "Antigravity")
     }
 
     /// An arrangement somebody made is theirs, and is not to be re-sorted
@@ -76,8 +80,15 @@ struct RailSlotTests {
     func addedAccountsSortByLabel() {
         let extra = ExtraAccount(provider: .claudeCode, slot: "work", label: "Aardvark")
         let settings = AppSettings(extraAccounts: [extra], providerOrder: [])
+        let names = settings.orderedAccounts.map { account in
+            account == extra.key ? "Aardvark" : account.provider.displayName
+        }
 
-        #expect(settings.orderedAccounts.first == extra.key)
+        #expect(names == names.sorted { $0.localizedStandardCompare($1) == .orderedAscending })
+        // First among the Latin rows. A CJK product name may still sit above
+        // the whole Latin run, which is this Mac's collation and not the
+        // label's fault.
+        #expect(names.first { $0.first?.isASCII == true } == "Aardvark")
     }
 
     /// A control that is enabled and does nothing is the one thing a control

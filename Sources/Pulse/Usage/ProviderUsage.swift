@@ -486,6 +486,10 @@ struct ProviderUsage: Identifiable, Equatable, Sendable {
         /// buys tokens by the yuan instead. A complete answer, not a fault,
         /// and the same distinction `zaiNoCodingPlan` exists for.
         case xiaomiNoCodingPlan
+        /// The session works and the balance route reported no money at all
+        /// — neither a purse nor a zero. Distinct from a zero balance, which
+        /// is money Pulse read.
+        case xiaomiNoBalance
         /// No key has been entered for a provider that needs one.
         case apiKeyMissing
         /// There is a key, and the service refused it.
@@ -524,6 +528,7 @@ struct ProviderUsage: Identifiable, Equatable, Sendable {
             case .xiaomiSessionMissing: .localized("Sign in to Xiaomi's platform in a browser to see usage.")
             case .xiaomiSessionExpired: .localized("Xiaomi's saved session expired. Sign in again in your browser.")
             case .xiaomiNoCodingPlan: .localized("No Coding Plan on this Xiaomi account.")
+            case .xiaomiNoBalance: .localized("No prepaid balance on this Xiaomi account.")
             case .ollamaSessionMissing: .localized("Add an Ollama session in Settings.")
             case .ollamaSessionExpired: .localized("The Ollama session expired. Sign in again and add it.")
             case .ollamaPageChanged: .localized("Ollama's page has changed and can no longer be read.")

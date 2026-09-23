@@ -28,7 +28,7 @@ struct BalanceAmountPreferenceTests {
             #expect(AppSettings.storedShowsBalanceAmounts(in: defaults) == [:])
             let untouched = AppSettings(showsBalanceAmounts: [:])
             #expect(untouched.showsBalanceAmount(AccountKey(.deepSeek)))
-            #expect(untouched.showsBalanceAmount(AccountKey(.xiaomiMiMo)))
+            #expect(untouched.showsBalanceAmount(AccountKey(.xiaomiAPI)))
 
             // The round trip a launch makes: what was stored is what the
             // next instance is built with.
@@ -45,17 +45,18 @@ struct BalanceAmountPreferenceTests {
     func theSwitchIsPerAccount() {
         withIsolatedDefaults { defaults in
             AppSettings.storeShowsBalanceAmounts(
-                [AccountKey(.deepSeek).id: false, AccountKey(.xiaomiMiMo).id: false],
+                [AccountKey(.deepSeek).id: false, AccountKey(.xiaomiAPI).id: false],
                 in: defaults)
             let settings = AppSettings(
                 showsBalanceAmounts: AppSettings.storedShowsBalanceAmounts(in: defaults))
             #expect(!settings.showsBalanceAmount(AccountKey(.deepSeek)))
-            #expect(!settings.showsBalanceAmount(AccountKey(.xiaomiMiMo)))
+            #expect(!settings.showsBalanceAmount(AccountKey(.xiaomiAPI)))
             #expect(settings.showsBalanceAmount(AccountKey(.commandCode)))
         }
     }
 
     @Test("The money rides the balance's own row, and only while it is asked for")
+    @MainActor
     func figureOnlyOnBalanceRows() {
         let balance = UsageWindow(
             id: "x.balance", kind: .balance, scope: nil,

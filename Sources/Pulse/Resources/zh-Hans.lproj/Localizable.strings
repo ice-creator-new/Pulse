@@ -584,6 +584,7 @@
 "Sign in to Xiaomi's platform in a browser to see usage." = "在浏览器里登录小米开放平台后才能看到用量。";
 "Xiaomi's saved session expired. Sign in again in your browser." = "小米的登录信息已过期，请在浏览器里重新登录。";
 "No Coding Plan on this Xiaomi account." = "这个小米账号上没有 Coding Plan。";
+"No prepaid balance on this Xiaomi account." = "这个小米账号上没有预存余额。";
 "Reads the console with your signed-in browser session." = "用你已登录的浏览器会话读取控制台。";
 
 /* 网络代理 */

@@ -65,10 +65,10 @@ Pulse 是一个停靠在屏幕边缘的小巧悬浮监视器。它展示各服�
 
 ### 多账号管理与本地消费账本
 - **多账号并行**：支持同一服务绑定多个订阅（Claude Code、Codex、Grok、Grok Bot），并排查看并自定义标签。
-- **Token 消耗（设置内查看）**：默认关闭，在页面顶部开启后才读取本机记录，关闭即可停止扫描。支持本地日志、数据库与导出文件，目录涵盖 **54 个客户端来源**，包括 Gemini CLI、Cline、Roo Code、OpenClaw 和 GitHub Copilot。Cursor、Trae 等导出来源需要先导出或捕获记录。这些来源与浮动栏上的 19 个配额服务商不同，各自支持的格式和真实客户端验证情况见[来源说明](Docs/token-spend-sources.md)。
+- **Token 消耗（设置内查看）**：默认关闭，在页面顶部开启后才读取本机记录，关闭即可停止扫描。支持本地日志、数据库与导出文件，目录涵盖 **54 个客户端来源**，包括 Gemini CLI、Cline、Roo Code、OpenClaw 和 GitHub Copilot。Cursor、Trae 等导出来源需要先导出或捕获记录。这些来源与浮动栏上的 21 个配额服务商不同，各自支持的格式和真实客户端验证情况见[来源说明](Docs/token-spend-sources.md)。
 - **明确的用量估算**：默认查看最近 7 天，并记住所选区间。费用按公开 API 价格折算，不是订阅账单；未知价格保留为不可用，计数不完整或时间粒度较粗会明确标注，没有 token 计数的来源会如实标注为不可用。
 - **模型详情与图表**：点开单个模型可查看输入/输出/缓存读写用量与估算费用、有记录支撑的每日与每小时图表、各 Agent 的贡献，以及可排序、分页的明细表。指向图表即可读取对应日期或小时的 Token 数量。缺失的每日或每小时明细会标注为不可用。
-- **二十个服务商**：Claude Code、Codex、Kiro、Antigravity、Cursor、GitHub Copilot、Grok、Grok Bot、OpenCode Go、Kimi Code、Ollama Cloud、z.ai、Zhipu、MiniMax（国际与国内）、火山引擎、Command Code、DeepSeek、Devin，以及小米 Coding Plan。
+- **二十一个服务商**：Claude Code、Codex、Kiro、Antigravity、Cursor、GitHub Copilot、Grok、Grok Bot、OpenCode Go、Kimi Code、Ollama Cloud、z.ai、Zhipu、MiniMax（国际与国内）、火山引擎、Command Code、DeepSeek、Devin、小米 Coding Plan，以及小米API。
 - **可脚本化**：`Pulse --json` 输出最近一次读数——套餐、每条限额、重置时间，以及数字有多旧——可接 tmux、sketchybar、Raycast 或 shell 提示符。它只读缓存，所以高频轮询几乎不花代价。
 - **开发者集成**：在设置中导出 Raycast 扩展及可直接配置的 tmux、sketchybar、终端脚本；通过账户链接直达对应设置页。[安装指南](Docs/integrations.md)。
 - **连接诊断**：查看实际读数来源、缓存使用情况、最近检查及回退结果；根据原因直接重连、重新登录或编辑凭据，并可复制不含账户信息和密钥的诊断报告。
@@ -124,7 +124,8 @@ Pulse 只呈现各服务上报的数字，每个百分比都来自那份回复�
 | **Command Code** | 设置中填入 API Key，或读取 `cmd auth login` 已保存的登录 | 以美元计费的余额；含滚动 5 小时 / 周限额与月度套餐行（标记为**估算**） |
 | **DeepSeek** | 设置中填入 API Key；官方文档化的 `GET /user/balance` | 仅报告预付余额、无额度；圆环的度量基准由你选择 |
 | **Devin** | 什么都不用填——读取浏览器里的登录会话，无需钥匙串授权 | 每日与每周额度均由 Devin 报告。没有浏览器会话或手填凭据时，读取应用存下的带日期套餐；接口失败只使用账户与组织匹配的接口缓存（[Docs/providers/devin.md](Docs/providers/devin.md)）|
-| **小米 Coding Plan** | 什么都不用填——读取浏览器里已登录的会话，也可以手动粘贴 `Cookie:` 头 | 小米 MiMo 控制台上的月度 token 额度，有结束时间就一并显示；预付余额自成一行——以 Pulse 观察到的最高余额为分母，标注为估算——并可为它设置「余额低于」提醒。账号上既没有套餐也没有余额时会直说，而不是画一个 0%（[Docs/providers/xiaomi-coding-plan.md](Docs/providers/xiaomi-coding-plan.md)） |
+| **小米 Coding Plan** | 什么都不用填——读取浏览器里已登录的会话，也可以手动粘贴 `Cookie:` 头 | 小米 MiMo 控制台上的月度 token 额度，有结束时间就一并显示。预付余额由「小米API」单独一行读取，并在那里以 Pulse 观察到的最高余额画环、显示准确金额并提供「余额低于」提醒。账号上没有套餐时会直说，而不是画一个 0%（[Docs/providers/xiaomi-coding-plan.md](Docs/providers/xiaomi-coding-plan.md)） |
+| **小米API** | 什么都不用填——读取浏览器里已登录的会话，也可以手动粘贴 `Cookie:` 头 | 小米预付余额自成一个圆环，以 Pulse 观察到的最高余额为分母，标注为估算；卡片同时显示准确余额并可设置「余额低于」提醒。余额为零也是读到的钱；接口没有余额字段时会直说（[Docs/providers/xiaomi-api.md](Docs/providers/xiaomi-api.md)） |
 
 ---
 

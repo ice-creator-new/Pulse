@@ -584,6 +584,7 @@
 "Sign in to Xiaomi's platform in a browser to see usage." = "ブラウザで Xiaomi のプラットフォームにサインインすると使用量が表示されます。";
 "Xiaomi's saved session expired. Sign in again in your browser." = "Xiaomi の保存済みセッションが期限切れです。ブラウザでサインインし直してください。";
 "No Coding Plan on this Xiaomi account." = "この Xiaomi アカウントに Coding Plan はありません。";
+"No prepaid balance on this Xiaomi account." = "この Xiaomi アカウントに残高はありません。";
 "Reads the console with your signed-in browser session." = "サインイン済みのブラウザセッションでコンソールを読みます。";
 
 /* ネットワークプロキシ */

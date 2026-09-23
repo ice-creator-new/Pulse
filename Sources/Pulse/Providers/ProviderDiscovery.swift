@@ -36,7 +36,7 @@ extension Provider {
                 local("Library/Application Support/\($0)/User/globalStorage/state.vscdb")
             }
         case .kimiCode, .ollamaCloud, .zai, .minimax, .minimaxCN, .copilot,
-             .volcengine, .deepSeek, .xiaomiMiMo:
+             .volcengine, .deepSeek, .xiaomiMiMo, .xiaomiAPI:
             return []
         }
     }

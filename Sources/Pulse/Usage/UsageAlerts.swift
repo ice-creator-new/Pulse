@@ -403,8 +403,10 @@ struct AlertMemory: Codable, Sendable, Equatable {
              // prevent.
              .zaiNoCodingPlan,
              // And the same again for Xiaomi: the session worked and the
-             // account simply has no plan on it.
-             .xiaomiNoCodingPlan:
+             // account simply has no plan on it — or, on the purse row, no
+             // money at all. A zero balance is money; this is the reply
+             // carrying neither.
+             .xiaomiNoCodingPlan, .xiaomiNoBalance:
             .answered
 
         // Never set up, never signed in, or an app that simply is not

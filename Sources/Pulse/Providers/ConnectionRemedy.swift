@@ -41,7 +41,7 @@ enum ConnectionRemedy: Equatable {
         case .codexNotInstalled, .kiroNotInstalled, .kiroVersionUnsupported,
              .volcengineCLIMissing, .noLimitsReported,
              .grokBotNotIncluded, .zaiNoCodingPlan, .xiaomiNoCodingPlan,
-             .ollamaPageChanged, .unreadableReply:
+             .xiaomiNoBalance, .ollamaPageChanged, .unreadableReply:
             return .help
         }
     }
@@ -70,6 +70,7 @@ enum ConnectionRemedy: Equatable {
         case .kimiCode: "kimi-code"
         case .ollamaCloud: "ollama-cloud"
         case .xiaomiMiMo: "xiaomi-coding-plan"
+        case .xiaomiAPI: "xiaomi-api"
         case .zai, .glmCoding: "zai"
         case .minimax, .minimaxCN: "minimax"
         case .copilot: "copilot"

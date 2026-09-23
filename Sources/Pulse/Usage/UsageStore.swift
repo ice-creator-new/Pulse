@@ -408,6 +408,7 @@ final class UsageStore {
         let kimi = KimiCodeUsageService(enteredKey: apiKeys[.kimiCode])
         let ollama = OllamaCloudUsageService(cookie: apiKeys[.ollamaCloud])
         let xiaomi = XiaomiMiMoUsageService(cookie: apiKeys[.xiaomiMiMo])
+        let xiaomiAPI = XiaomiAPIUsageService(cookie: apiKeys[.xiaomiAPI])
         let zai = ZaiUsageService(provider: .zai, enteredKey: apiKeys[.zai])
         let glm = ZaiUsageService(provider: .glmCoding, enteredKey: apiKeys[.glmCoding])
         let minimax = MiniMaxUsageService(provider: .minimax, enteredKey: apiKeys[.minimax])
@@ -476,6 +477,9 @@ final class UsageStore {
             async let xiaomiUsage = wanted.contains(.xiaomiMiMo)
                 ? await xiaomi.fetch()
                 : ProviderUsage.unavailable(.xiaomiMiMo, reason: .loading)
+            async let xiaomiAPIUsage = wanted.contains(.xiaomiAPI)
+                ? await xiaomiAPI.fetch()
+                : ProviderUsage.unavailable(.xiaomiAPI, reason: .loading)
             async let kimiUsage = wanted.contains(.kimiCode)
                 ? await kimi.fetch()
                 : ProviderUsage.unavailable(.kimiCode, reason: .loading)
@@ -522,6 +526,7 @@ final class UsageStore {
             let (rawVolcengine, rawCommandCode) = await (volcengineUsage, commandCodeUsage)
             let (rawDeepSeek, rawDevin) = await (deepSeekUsage, devinUsage)
             let rawXiaomi = await xiaomiUsage
+            let rawXiaomiAPI = await xiaomiAPIUsage
 
             // **The disowning is checked before anything is written, not just
             // before the readings are handed to the panel.** `reconciled`
@@ -563,6 +568,7 @@ final class UsageStore {
                 (.deepSeek, rawDeepSeek),
                 (.devin, rawDevin),
                 (.xiaomiMiMo, rawXiaomi),
+                (.xiaomiAPI, rawXiaomiAPI),
             ] where wanted.contains(provider) {
                 results.append(BatchResult(
                     provider: provider,
@@ -661,6 +667,7 @@ final class UsageStore {
         let kimi = KimiCodeUsageService(enteredKey: key)
         let ollama = OllamaCloudUsageService(cookie: key)
         let xiaomi = XiaomiMiMoUsageService(cookie: key)
+        let xiaomiAPI = XiaomiAPIUsageService(cookie: key)
         let zai = ZaiUsageService(provider: provider, enteredKey: key)
         let minimax = MiniMaxUsageService(provider: provider, enteredKey: key)
         let volcengine = VolcengineUsageService(enteredKey: key)
@@ -718,6 +725,8 @@ final class UsageStore {
                 raw = await devinAccount.fetch(source: source)
             case .xiaomiMiMo:
                 raw = await xiaomi.fetch()
+            case .xiaomiAPI:
+                raw = await xiaomiAPI.fetch()
             }
             }
 
@@ -790,7 +799,7 @@ final class UsageStore {
         // Nothing else can be signed in to, so nothing else gets here.
         case .kiro, .antigravity, .cursor, .openCodeGo, .kimiCode, .ollamaCloud,
              .zai, .glmCoding, .minimax, .minimaxCN, .copilot, .volcengine,
-             .commandCode, .deepSeek, .devin, .xiaomiMiMo:
+             .commandCode, .deepSeek, .devin, .xiaomiMiMo, .xiaomiAPI:
             .unavailable(account, reason: .loading)
         }
     }

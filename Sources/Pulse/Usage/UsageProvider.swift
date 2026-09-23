@@ -26,6 +26,10 @@ enum Provider: String, CaseIterable, Identifiable, Codable, Sendable {
     case deepSeek
     case devin
     case xiaomiMiMo
+    /// Xiaomi's prepaid inference purse, split out of the Coding Plan row:
+    /// one account sells two things — a monthly token allowance and money
+    /// spent by the yuan — and a single ring can only show one of them.
+    case xiaomiAPI
 
     var id: String { rawValue }
 
@@ -88,6 +92,11 @@ enum Provider: String, CaseIterable, Identifiable, Codable, Sendable {
         // denominator and the thing the buyer signed up for. "Xiaomi MiMo"
         // would name the platform and leave the two products sharing a row.
         case .xiaomiMiMo: "Xiaomi Coding Plan"
+        // The prepaid purse on that same platform, its own row. The reader's
+        // own name for the product — the yuan-metered API side of the
+        // account — kept in Chinese the way it is sold, rather than folded
+        // into the plan's name.
+        case .xiaomiAPI: "小米API"
         }
     }
 
@@ -127,8 +136,10 @@ enum Provider: String, CaseIterable, Identifiable, Codable, Sendable {
         // "Xiaomi / MiMo" lockup and that is what the console's own favicon
         // is. Shipped as it stands rather than cropped to something Xiaomi
         // does not use; at ring size it reads as a shape rather than as words,
-        // which is the trade for being the real mark.
-        case .xiaomiMiMo: "xiaomimimo"
+        // which is the trade for being the real mark. One mark for both rows,
+        // the way MiniMax's pair share theirs: the names on the card tell
+        // plan from purse.
+        case .xiaomiMiMo, .xiaomiAPI: "xiaomimimo"
         }
     }
 
@@ -151,7 +162,8 @@ enum Provider: String, CaseIterable, Identifiable, Codable, Sendable {
         // which is true today and better than a column of zeroes.
         case .kiro, .antigravity, .cursor, .openCodeGo, .kimiCode, .ollamaCloud,
              .zai, .glmCoding, .minimax, .minimaxCN, .copilot, .grok, .grokBot,
-             .volcengine, .commandCode, .deepSeek, .devin, .xiaomiMiMo: false
+             .volcengine, .commandCode, .deepSeek, .devin, .xiaomiMiMo,
+             .xiaomiAPI: false
         }
     }
 
@@ -198,7 +210,7 @@ enum Provider: String, CaseIterable, Identifiable, Codable, Sendable {
         case .claudeCode, .codex, .volcengine, .devin: true
         case .kiro, .antigravity, .cursor, .openCodeGo, .kimiCode, .ollamaCloud,
              .zai, .glmCoding, .minimax, .minimaxCN, .copilot, .grok, .grokBot,
-             .commandCode, .deepSeek, .xiaomiMiMo: false
+             .commandCode, .deepSeek, .xiaomiMiMo, .xiaomiAPI: false
         }
     }
 
@@ -237,7 +249,7 @@ enum Provider: String, CaseIterable, Identifiable, Codable, Sendable {
         // about elsewhere, so there is nothing here to state.
         case .claudeCode, .codex, .openCodeGo, .kimiCode, .ollamaCloud,
              .zai, .glmCoding, .minimax, .minimaxCN, .copilot, .volcengine,
-             .commandCode, .deepSeek, .devin, .xiaomiMiMo:
+             .commandCode, .deepSeek, .devin, .xiaomiMiMo, .xiaomiAPI:
             nil
         }
     }
@@ -249,7 +261,7 @@ enum Provider: String, CaseIterable, Identifiable, Codable, Sendable {
     /// anyone on the plan who doesn't run the CLI on this Mac.
     var usesAPIKey: Bool {
         [.openCodeGo, .kimiCode, .ollamaCloud, .zai, .glmCoding, .minimax, .minimaxCN, .volcengine,
-         .commandCode, .deepSeek, .devin, .xiaomiMiMo].contains(self)
+         .commandCode, .deepSeek, .devin, .xiaomiMiMo, .xiaomiAPI].contains(self)
     }
 
     /// Whether this Mac can see the thing this provider is billing for.
@@ -270,10 +282,14 @@ enum Provider: String, CaseIterable, Identifiable, Codable, Sendable {
     /// number and a currency — **and** an allowance Pulse can name a figure
     /// against, which is what the "warn below" row actually compares.
     ///
-    /// Xiaomi qualifies on its own terms rather than by having an allowance:
-    /// the platform reports a bare balance like DeepSeek's, and the figure the
-    /// reader types is compared against the money itself.
-    var reportsSpendableBalance: Bool { [.deepSeek, .commandCode, .xiaomiMiMo].contains(self) }
+    /// `xiaomiAPI` is Xiaomi's prepaid purse, split out of the Coding Plan
+    /// row: the platform reports a bare balance like DeepSeek's, and the
+    /// figure the reader types is compared against the money itself. The plan
+    /// row is not on this list — its percentage has a real denominator and no
+    /// money rides along with it.
+    var reportsSpendableBalance: Bool {
+        [.deepSeek, .commandCode, .xiaomiAPI].contains(self)
+    }
 
     /// Whether the pasted credential is a **pair** rather than one token.
     ///
@@ -289,10 +305,12 @@ enum Provider: String, CaseIterable, Identifiable, Codable, Sendable {
     /// signed-in settings page — so a session is the only credential there is,
     /// and calling it an API key in Settings would send people looking for one
     /// that does not exist.
-    /// Xiaomi joins it for the same reason: the platform's API keys buy
-    /// inference and answer none of the console's account routes, so the plan
-    /// and the balance are behind the web session and nothing else.
-    var usesSessionCookie: Bool { self == .ollamaCloud || self == .xiaomiMiMo }
+    /// Xiaomi's two rows join it for the same reason: the platform's API keys
+    /// buy inference and answer none of the console's account routes, so the
+    /// plan and the balance are behind the web session and nothing else.
+    var usesSessionCookie: Bool {
+        self == .ollamaCloud || self == .xiaomiMiMo || self == .xiaomiAPI
+    }
 
     /// Whether this provider's credential is read out of a browser rather than
     /// out of another tool's files.

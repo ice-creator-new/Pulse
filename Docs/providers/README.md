@@ -1,10 +1,10 @@
 # Providers
 
-Pulse tracks **twenty** `Provider` cases. There is no Pulse backend and no Pulse account. Each provider reports its own usage by whatever route that product actually offers — often an undocumented account endpoint the product itself calls, sometimes a documented usage path, sometimes a local helper that only exists while an editor is open.
+Pulse tracks **twenty-one** `Provider` cases. There is no Pulse backend and no Pulse account. Each provider reports its own usage by whatever route that product actually offers — often an undocumented account endpoint the product itself calls, sometimes a documented usage path, sometimes a local helper that only exists while an editor is open.
 
 This directory is the home for routes, credentials, cookies, extra logins, and the failure lessons that belong to those. Current service code is authoritative. Historical measurements and “do not repeat” notes are labelled as such. Nothing here claims a runtime test of a live account.
 
-This page is about **quota providers** — the twenty cases Pulse can draw a ring for. Token spend readers are a different, overlapping catalogue of agents that left records on this Mac, most of which Pulse draws no ring for; they and their stores are documented in [`../token-spend.md`](../token-spend.md) and [`../token-spend-sources.md`](../token-spend-sources.md), not here. Do not add a spend reader to this directory.
+This page is about **quota providers** — the twenty-one cases Pulse can draw a ring for. Token spend readers are a different, overlapping catalogue of agents that left records on this Mac, most of which Pulse draws no ring for; they and their stores are documented in [`../token-spend.md`](../token-spend.md) and [`../token-spend-sources.md`](../token-spend-sources.md), not here. Do not add a spend reader to this directory.
 
 Shared types: [`../../Sources/Pulse/Usage/UsageProvider.swift`](../../Sources/Pulse/Usage/UsageProvider.swift), [`../../Sources/Pulse/Usage/MonitoredAccount.swift`](../../Sources/Pulse/Usage/MonitoredAccount.swift), [`../../Sources/Pulse/Usage/ProviderUsage.swift`](../../Sources/Pulse/Usage/ProviderUsage.swift), [`../../Sources/Pulse/Usage/UsageSource.swift`](../../Sources/Pulse/Usage/UsageSource.swift). Sign-in machinery: [authentication.md](authentication.md).
 
@@ -36,10 +36,11 @@ Accounts the stored rail does not mention are appended **in name order**, not in
 | `.deepSeek` | DeepSeek | `deepseek` | Pasted key | no | one, documented | no | none |
 | `.devin` | Devin | `devin` | Browser `localStorage` (no keychain); optional pasted `token org` | no | saved plan / endpoint | no | the app's `state.vscdb` exists |
 | `.xiaomiMiMo` | Xiaomi Coding Plan | `xiaomimimo` | Browser session for `platform.xiaomimimo.com`, or a pasted `Cookie:` header | no | one, named | no | none |
+| `.xiaomiAPI` | 小米API | `xiaomimimo` | Same browser session as the plan row | no | one, balance | no | none |
 
-Per-provider pages: [claude-code.md](claude-code.md), [codex.md](codex.md), [kiro.md](kiro.md), [antigravity.md](antigravity.md), [cursor.md](cursor.md), [opencode-go.md](opencode-go.md), [kimi-code.md](kimi-code.md), [ollama-cloud.md](ollama-cloud.md), [zai.md](zai.md), [minimax.md](minimax.md), [copilot.md](copilot.md), [grok.md](grok.md), [grok-bot.md](grok-bot.md), [volcengine.md](volcengine.md), [command-code.md](command-code.md), [deepseek.md](deepseek.md), [devin.md](devin.md), [xiaomi-coding-plan.md](xiaomi-coding-plan.md).
+Per-provider pages: [claude-code.md](claude-code.md), [codex.md](codex.md), [kiro.md](kiro.md), [antigravity.md](antigravity.md), [cursor.md](cursor.md), [opencode-go.md](opencode-go.md), [kimi-code.md](kimi-code.md), [ollama-cloud.md](ollama-cloud.md), [zai.md](zai.md), [minimax.md](minimax.md), [copilot.md](copilot.md), [grok.md](grok.md), [grok-bot.md](grok-bot.md), [volcengine.md](volcengine.md), [command-code.md](command-code.md), [deepseek.md](deepseek.md), [devin.md](devin.md), [xiaomi-coding-plan.md](xiaomi-coding-plan.md), [xiaomi-api.md](xiaomi-api.md).
 
-Ollama Cloud and Xiaomi Coding Plan are the two read from a **browser session** rather than a key or another tool's files; they share [`BrowserCookies.swift`](../../Sources/Pulse/Auth/BrowserCookies.swift) and nothing else, because what counts as a session differs per site and a shared filter would forward whichever cookie either one adds next.
+Ollama Cloud and Xiaomi's two rows are the ones read from a **browser session** rather than a key or another tool's files; they share [`BrowserCookies.swift`](../../Sources/Pulse/Auth/BrowserCookies.swift) and nothing else, because what counts as a session differs per site and a shared filter would forward whichever cookie either one adds next.
 
 Z.ai and GLM Coding Plan share [`ZaiUsageService.swift`](../../Sources/Pulse/Providers/ZaiUsageService.swift). MiniMax and MiniMax CN share [`MiniMaxUsageService.swift`](../../Sources/Pulse/Providers/MiniMaxUsageService.swift). Two rings, two accounts, two keys — not a region switch inside one provider.
 

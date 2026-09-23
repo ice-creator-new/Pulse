@@ -224,39 +224,34 @@ struct XiaomiMiMoTests {
         #expect(window.elapsedFraction() == nil)
     }
 
-    /// A plan draws its ring and carries the balance beside it. With no
-    /// watched peak yet there is no denominator for the money, so the plan is
-    /// the only row — the figure travels as money, never as a fraction of a
-    /// number Pulse has not seen move.
-    @Test("A plan draws a window and keeps the money")
-    func planReadingKeepsBalance() throws {
-        let snapshot = try Self.snapshot(
+    /// The plan draws its ring and carries no money — the prepaid purse is
+    /// `xiaomiAPI`'s whole job, so this reading has neither a balance window
+    /// nor a `creditBalance` line.
+    @Test("A plan draws a window and keeps no money of its own")
+    func planReadingIsPlanOnly() throws {
+        let plan = try #require(XiaomiMiMoClient.parsePlan(
             detail: Self.fixture("xiaomi-plan-detail"),
-            usage: Self.fixture("xiaomi-plan-usage"),
-            balance: Self.fixture("xiaomi-balance"))
-        let reading = XiaomiMiMoUsageService.reading(from: snapshot, peak: nil)
+            usage: Self.fixture("xiaomi-plan-usage")))
+        let reading = XiaomiMiMoUsageService.reading(from: plan)
         #expect(reading.state == .live)
         #expect(reading.windows.count == 1)
         #expect(reading.windows[0].id == "xiaomi.plan")
-        #expect(reading.creditBalance != nil)
-        #expect(reading.creditRemaining?.amount == 42.75)
-        #expect(reading.creditRemaining?.currency == "CNY")
+        #expect(reading.creditBalance == nil)
+        #expect(reading.creditRemaining == nil)
         #expect(reading.reportsSomething)
     }
 
-    /// The balance gets a row of its own once there is a peak to measure it
+    /// The purse gets a ring of its own once there is a peak to measure it
     /// against — the denominator is something Pulse **watched**, and the row
     /// says so through `estimate`, on screen and in `--json`.
-    @Test("The balance draws a second window against the watched peak")
+    @Test("The purse draws its own window against the watched peak")
     func balanceDrawsItsOwnWindow() throws {
-        let snapshot = try Self.snapshot(
-            detail: Self.fixture("xiaomi-plan-detail"),
-            usage: Self.fixture("xiaomi-plan-usage"),
-            balance: Self.fixture("xiaomi-balance"))
-        let reading = XiaomiMiMoUsageService.reading(from: snapshot, peak: 100)
-        #expect(reading.windows.map(\.id) == ["xiaomi.plan", "xiaomi.balance"])
+        let money = try #require(try XiaomiMiMoClient.parseBalance(try Self.fixture("xiaomi-balance")))
+        let reading = XiaomiAPIUsageService.reading(from: money, peak: 100)
+        #expect(reading.state == .live)
+        #expect(reading.windows.map(\.id) == ["xiaomi.balance"])
 
-        let balance = try #require(reading.windows.first { $0.id == "xiaomi.balance" })
+        let balance = try #require(reading.windows.first)
         #expect(balance.kind == .balance)
         #expect(balance.estimate == .sinceTopUp)
         #expect(balance.usedFraction == (100 - 42.75) / 100)
@@ -269,33 +264,32 @@ struct XiaomiMiMoTests {
         // And it is never "spent": that word belongs to the provider's own
         // flag, and Xiaomi reports none for money.
         #expect(!balance.isExhausted)
+        #expect(reading.creditBalance != nil)
+        #expect(reading.creditRemaining?.amount == 42.75)
+        #expect(reading.creditRemaining?.currency == "CNY")
     }
 
-    /// An account with money and no Coding Plan: the money *is* the reading,
-    /// and it is now a window like any other — a ring the rail can draw and a
-    /// figure the low-balance rule can watch — rather than a line that only
-    /// appeared because there was nothing else to draw.
-    @Test("Money with no plan is a balance window, not a refusal")
+    /// An account with money and no Coding Plan: the money *is* the reading
+    /// on `xiaomiAPI` — a ring the rail can draw and a figure the low-balance
+    /// rule can watch. The plan row separately says it has no plan.
+    @Test("Money with no plan is the purse row's whole reading")
     func balanceWithoutPlanIsStillAReading() throws {
-        let snapshot = try Self.snapshot(
-            detail: Self.fixture("xiaomi-plan-detail"),
-            usage: Self.fixture("xiaomi-no-plan"),
-            balance: Self.fixture("xiaomi-balance"))
-        let reading = XiaomiMiMoUsageService.reading(from: snapshot, peak: 100)
+        let money = try #require(try XiaomiMiMoClient.parseBalance(try Self.fixture("xiaomi-balance")))
+        let reading = XiaomiAPIUsageService.reading(from: money, peak: 100)
         #expect(reading.state == .live)
         #expect(reading.windows.map(\.id) == ["xiaomi.balance"])
         #expect(reading.creditBalance != nil)
         #expect(reading.creditRemaining?.amount == 42.75)
-        // A balance is an answer: the cache keeps it rather than papering
-        // over an empty window list as a failed fetch.
         #expect(reading.reportsSomething)
         // There is money to put a figure against, so Settings offers the
         // "warn below" line — as it does for DeepSeek and Command Code.
-        #expect(Provider.xiaomiMiMo.reportsSpendableBalance)
+        #expect(Provider.xiaomiAPI.reportsSpendableBalance)
         // And it is spent on Xiaomi's servers, where nothing on this Mac
         // moves when it drains — so the refresh wait is capped at the
         // unwatched ceiling instead of sitting on the half-hour one.
-        #expect(!Provider.xiaomiMiMo.spendingIsWatchedLocally)
+        #expect(!Provider.xiaomiAPI.spendingIsWatchedLocally)
+        // The plan row no longer carries money at all.
+        #expect(!Provider.xiaomiMiMo.reportsSpendableBalance)
     }
 
     /// A balance of zero is money Pulse read, not a read that failed: no
@@ -304,13 +298,10 @@ struct XiaomiMiMoTests {
     /// the alert's number are all still there.
     @Test("A balance of zero is still money, not a missing reading")
     func zeroBalanceIsStillAReading() throws {
-        let snapshot = try Self.snapshot(
-            detail: Self.fixture("xiaomi-plan-detail"),
-            usage: Self.fixture("xiaomi-no-plan"),
-            balance: Data("""
-            {"code":0,"message":"","data":{"balance":"0.00","currency":"CNY"}}
-            """.utf8))
-        let reading = XiaomiMiMoUsageService.reading(from: snapshot, peak: 0)
+        let money = try #require(try XiaomiMiMoClient.parseBalance(Data("""
+        {"code":0,"message":"","data":{"balance":"0.00","currency":"CNY"}}
+        """.utf8)))
+        let reading = XiaomiAPIUsageService.reading(from: money, peak: 0)
         #expect(reading.state == .live)
         #expect(reading.windows.isEmpty)
         #expect(reading.creditBalance != nil)
@@ -318,34 +309,15 @@ struct XiaomiMiMoTests {
         #expect(reading.reportsSomething)
     }
 
-    /// No plan and no money is still the subscription answer, not a fault and
-    /// not an empty live reading that would draw a blank slot forever.
-    @Test("Neither plan nor balance says so, rather than drawing nothing")
+    /// No plan is still the subscription answer on the plan row, not a fault
+    /// and not an empty live reading that would draw a blank slot forever.
+    @Test("No plan says so on the plan row")
     func neitherPlanNorBalanceIsNoCodingPlan() throws {
-        let snapshot = try Self.snapshot(
-            detail: Self.fixture("xiaomi-plan-detail"),
-            usage: Self.fixture("xiaomi-no-plan"),
-            balance: nil)
-        let reading = XiaomiMiMoUsageService.reading(from: snapshot, peak: nil)
+        let reading = XiaomiMiMoUsageService.reading(from: nil)
         #expect(reading.state == .unavailable(.xiaomiNoCodingPlan))
         #expect(reading.windows.isEmpty)
         #expect(reading.creditBalance == nil)
         #expect(!reading.reportsSomething)
-    }
-
-    /// A snapshot as the client would have handed it over, built from the
-    /// fixtures rather than from a live session. `balance` is optional because
-    /// the balance route is allowed to be the one that does not answer.
-    private static func snapshot(
-        detail: Data,
-        usage: Data,
-        balance: Data?
-    ) throws -> XiaomiMiMoSnapshot {
-        let money = balance.flatMap { try? XiaomiMiMoClient.parseBalance($0) }
-        return XiaomiMiMoSnapshot(
-            plan: XiaomiMiMoClient.parsePlan(detail: detail, usage: usage),
-            balance: money?.amount,
-            currency: money?.currency)
     }
 
     /// A session that was never set up and one that went stale are different
@@ -354,11 +326,13 @@ struct XiaomiMiMoTests {
     func noSessionIsNotAnExpiredOne() async {
         let usage = await XiaomiMiMoUsageService(cookie: nil).fetch()
         #expect(usage.state == .unavailable(.xiaomiSessionMissing))
+        let purse = await XiaomiAPIUsageService(cookie: nil).fetch()
+        #expect(purse.state == .unavailable(.xiaomiSessionMissing))
     }
 
-    /// The provider answers the questions the rest of the app asks of every
+    /// The plan row answers the questions the rest of the app asks of every
     /// case. Missing one is a silent fall-through into somebody else's branch.
-    @Test("The provider is wired up as a session-based one")
+    @Test("The plan row is wired up as a session-based one")
     func providerAnswersTheSharedQuestions() {
         let provider = Provider.xiaomiMiMo
         #expect(provider.displayName == "Xiaomi Coding Plan")
@@ -368,13 +342,28 @@ struct XiaomiMiMoTests {
         #expect(!provider.keepsLocalTranscripts)
         #expect(!provider.hasSourceChoice)
         #expect(provider.soleRoute == nil)
-        // Money to compare a figure against: the account reports a prepaid
-        // balance like DeepSeek's and Command Code's, so the "warn below"
-        // line is offered for it.
-        #expect(provider.reportsSpendableBalance)
+        // The plan's percentage has a real denominator and no money rides
+        // along with it — the purse row owns the "warn below" line.
+        #expect(!provider.reportsSpendableBalance)
         // Nothing to detect on disk: the session lives in a browser, and a
         // browser is not evidence of an account.
         #expect(!Provider.installedOnThisMac().contains(.xiaomiMiMo))
+    }
+
+    /// The purse row is the money half of the same platform: same session
+    /// shape, and the one that owns `reportsSpendableBalance`.
+    @Test("The purse row is the money half of the same platform")
+    func apiProviderAnswersTheSharedQuestions() {
+        let provider = Provider.xiaomiAPI
+        #expect(provider.displayName == "小米API")
+        #expect(provider.usesSessionCookie)
+        #expect(provider.readsBrowserStorage)
+        #expect(provider.keepsOwnCredential)
+        #expect(!provider.keepsLocalTranscripts)
+        #expect(provider.reportsSpendableBalance)
+        #expect(!provider.spendingIsWatchedLocally)
+        #expect(provider.iconResource == Provider.xiaomiMiMo.iconResource)
+        #expect(!Provider.installedOnThisMac().contains(.xiaomiAPI))
     }
 
     /// An icon that is not in the bundle draws nothing, and a ring with no
@@ -386,5 +375,7 @@ struct XiaomiMiMoTests {
     func iconResourceLoads() {
         #expect(LobeIconStore.image(named: Provider.xiaomiMiMo.iconResource) != nil,
                 "\(Provider.xiaomiMiMo.iconResource).svg does not load")
+        #expect(LobeIconStore.image(named: Provider.xiaomiAPI.iconResource) != nil,
+                "\(Provider.xiaomiAPI.iconResource).svg does not load")
     }
 }

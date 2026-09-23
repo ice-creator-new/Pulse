@@ -584,6 +584,7 @@
 "Sign in to Xiaomi's platform in a browser to see usage." = "Sign in to Xiaomi's platform in a browser to see usage.";
 "Xiaomi's saved session expired. Sign in again in your browser." = "Xiaomi's saved session expired. Sign in again in your browser.";
 "No Coding Plan on this Xiaomi account." = "No Coding Plan on this Xiaomi account.";
+"No prepaid balance on this Xiaomi account." = "No prepaid balance on this Xiaomi account.";
 "Reads the console with your signed-in browser session." = "Reads the console with your signed-in browser session.";
 
 /* Network proxy */

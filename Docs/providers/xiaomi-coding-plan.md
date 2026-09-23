@@ -1,6 +1,6 @@
 # Xiaomi Coding Plan
 
-Xiaomi's MiMo open platform, read through the console's own account routes.
+Xiaomi's MiMo open platform, read through the console's own account routes — the **monthly token allowance** half of the account. The prepaid purse is its own row: [xiaomi-api.md](xiaomi-api.md).
 
 **Provenance: [CodexBar](https://github.com/steipete/CodexBar), then the live platform.** The routes, the envelope and the cookie names were first read off CodexBar's implementation and its `docs/mimo.md` — which is where this provider came from — and on **2026-09-21** all three routes were fetched against a real session with the exact request `XiaomiMiMoClient` builds. That pass settled several contract-shaped guesses and pinned their key sets into the fixtures; what it could not settle needs an account with a running plan and is left under [Unconfirmed](#unconfirmed). Both halves: [Measured live](#measured-live-2026-09-21).
 
@@ -9,15 +9,15 @@ Xiaomi's MiMo open platform, read through the console's own account routes.
 - `Provider.xiaomiMiMo`. Icon `xiaomimimo`. Extra accounts: no. Transcripts: no. Spending history: no.
 - First run: offered unchecked in the chooser, with no detected hint. A browser on this Mac is no evidence of an account. After choosing it, import a session in Settings. It participates in the enabled-account refresh pass, including the first pass after selection.
 - `usesAPIKey` is true so Settings draws a credential row; `usesSessionCookie` is true so that row is a **browser session** rather than an API-key paste. The second one is the point: the platform *does* issue API keys, and they buy inference. None of them answers the console routes below.
-- Service: [`XiaomiMiMoUsageService.swift`](../../Sources/Pulse/Providers/XiaomiMiMoUsageService.swift). Tests: `XiaomiMiMoTests`, fixtures `Tests/PulseTests/Fixtures/xiaomi-*.json`.
+- Service: [`XiaomiMiMoUsageService.swift`](../../Sources/Pulse/Providers/XiaomiMiMoUsageService.swift) (shared with [xiaomi-api.md](xiaomi-api.md)). Tests: `XiaomiMiMoTests`, fixtures `Tests/PulseTests/Fixtures/xiaomi-*.json`.
 
 ## The name
 
-**"Xiaomi Coding Plan", not "Xiaomi MiMo".** The platform sells two different things on one account: inference by the yuan to anyone with a key, and a monthly token allowance bought on top of that. The row is named for the second — the thing with a subscription behind it and the thing the buyer signed up for — even though the prepaid balance has a row of its own beside it now. Naming the row for the platform would have it stand for both. CodexBar calls its equivalent "Xiaomi MiMo" because it leads with the balance; this one leads with the plan.
+**"Xiaomi Coding Plan", not "Xiaomi MiMo".** The platform sells two different things on one account: inference by the yuan to anyone with a key, and a monthly token allowance bought on top of that. This row is named for the second — the thing with a subscription behind it and the thing the buyer signed up for. The purse is [小米API](xiaomi-api.md), its own ring. Naming this row for the platform would have it stand for both. CodexBar calls its equivalent "Xiaomi MiMo" because it leads with the balance; this one leads with the plan.
 
 It is the longest name on the rail at eighteen characters, four past "GitHub Copilot", which is what the Settings sidebar was previously sized to. See [`../ui/settings.md`](../ui/settings.md).
 
-## One row, not two
+## One storefront, two products
 
 **Asked and answered: this is not another MiniMax.** Two providers on the rail are split into a mainland row and an international one — MiniMax / MiniMax CN, and z.ai / Zhipu — because those really are two storefronts: separate accounts, separate keys, and a key for one refused by the other. That split cost a real bug before it existed (issue #13, an international subscriber's key sent to the mainland service), so the question is worth asking of every Chinese provider added since.
 
@@ -30,6 +30,8 @@ Xiaomi is one storefront:
 `token-plan-cn.xiaomimimo.com` and `token-plan-sgp.xiaomimimo.com` both **do** resolve, which is what prompts the question. They are **inference** endpoints — the base URL a CLI wrapper points at, which is how CodexBar's local-usage fallback uses the `sgp` one — not consoles and not account boundaries. One account reaching whichever is nearer is the opposite of the MiniMax case.
 
 Not verified: whether signing up from outside mainland China lands on this same console. Two editions of the vendor's own documentation serving one URL is the evidence there is. If an overseas account turns out to have its own console, this is the page that was wrong, and the remedy is the second row rather than a region switch inside one — see the reasoning under `Provider.displayName` for why.
+
+**Two rows on that one storefront** — the plan here and the purse under [xiaomi-api.md](xiaomi-api.md) — because the account can hold both and a single ring can only show one figure. Same session, same host, separate credential slots.
 
 ## Credential
 
@@ -82,27 +84,11 @@ On the wire, `3xx` and `401`/`403` are all read as an expired session — an exp
 
 ## What the rail is told
 
-**Two windows, where there is money to draw.** `xiaomi.plan`, `kind: .monthly`, from the plan; `xiaomi.balance`, `kind: .balance`, from the prepaid balance. The plan's row comes first, and the headline rule takes it from there — the *fullest* window gets the ring, so a nearly-spent balance is allowed to outrank a barely-touched month because that is what will actually bite first. With the second-ring setting on, the two are simply the pair.
+**One window: `xiaomi.plan`, `kind: .monthly`.** The prepaid purse used to be a second window on this row; it is now [小米API](xiaomi-api.md)'s whole job, so this reading carries no `creditBalance` and no "warn below" line. An account with no plan answers `.xiaomiNoCodingPlan` — a complete answer, and the money half is a different ring.
 
 The plan's `windowSeconds` is thirty days and **`reportsLength` is false**. The platform states when the period ends and never how long it is, and a billing month is not a fixed number of seconds — so the length is a sort key, the window-clock arc is not drawn, and the forecast does not divide by it. Copilot's calendar month is carried the same way; see the `windowSeconds` section of [README.md](README.md).
 
-The reading carries `creditBalance` (the exact money, formatted) and `creditRemaining` (amount + currency) alongside the windows, so Settings, `--json` and the alert rule always have the figure: the card shows the fractions, as DeepSeek's does, with the exact sum beside the balance's own percentage — the account pane's **Balance amount** row, on by default — and in Settings.
-
-### The balance's denominator is a peak Pulse watched
-
-The platform reports money and **no allowance** to take a percentage of — DeepSeek's hole, filled by DeepSeek's rule: the denominator is the highest balance Pulse has watched in this currency since it last rose, and a balance that goes *up* can only be a top-up, which resets the mark. It is a figure Pulse **watched**, not one it made up, and the row still says it was inferred — `estimate` is `.sinceTopUp`, so the card writes the name as "Balance · since top-up" and `--json` reports `estimated: true` with `estimatedFrom: "sinceTopUp"`, exactly as [deepseek.md](deepseek.md) lays out.
-
-What it costs is the first run: with no mark yet, the first reading *becomes* the mark and the row reads 0% until money is actually spent. A peak of zero — an account that has never held credit — draws no row at all: never having had money is not the same as having spent it.
-
-Marks live in `xiaomimimo-baseline.json` — **this provider's own file**, one mark per currency, written off the main thread on the shared serial queue. The scope is the point: `DeepSeekBaseline` takes one precisely so that two accounts priced in the same currency cannot borrow each other's peaks, and neither file needed migrating when the scope was added. The mark is advanced once per **successful** fetch, in `XiaomiMiMoUsageService.fetch()`, not inside `reading(from:peak:)` — which takes the peak it is to draw against, so the mapping stays pure and a test run never writes into the marks of whoever is running it.
-
-There is **no basis picker** the way DeepSeek's pane has one: `sinceTopUp` is the only denominator this provider can offer, so nothing is asked and nothing beyond the warn-below row is added to its pane.
-
-**Without a plan:** the balance window *is* the reading — a ring the rail draws like any other, rather than the plain-figure fallback that used to be the whole card. A balance of **zero** with no plan is neither window nor refusal: it keeps `creditBalance`, the card draws "Credit balance", and the rail draws the short money form — an account that has spent everything is not one Pulse failed to read. `.xiaomiNoCodingPlan` remains for a session that worked and an account with neither plan nor money.
-
-`reportsSpendableBalance` is **true**: there is money to put a figure against, so the account pane grows the usual Notifications group with a "warn below" line, comparing `creditRemaining` against the figure the reader typed — money against money, never ¥ against $. The rule, its re-arming and why it is one per account: [../notifications.md](../notifications.md).
-
-With the flag above goes its inverse, `spendingIsWatchedLocally` — false for this provider now. Credit draining on Xiaomi's servers is invisible to AdaptiveRefresh's local signals, so the wait is **capped at `unwatchedCeiling`** instead of sitting on the half-hour ceiling; the same treatment DeepSeek and Command Code get. [../refresh-and-data.md](../refresh-and-data.md)
+`reportsSpendableBalance` is **false** here: the percentage has a real denominator and no money rides along with it. The purse row owns the flag and the warn-below line. [../notifications.md](../notifications.md)
 
 ## Measured live (2026-09-21)
 

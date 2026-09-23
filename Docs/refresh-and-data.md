@@ -1,6 +1,6 @@
 # Refresh, cache, activity, history
 
-Pulse shows **figures the provider reported**. It does not invent a usage percentage from local token counts. If a provider reports no figure, the UI says so. Labelled exceptions only, and each says on screen that it is inferred: the money estimate in Settings; Command Code's monthly plan grant, whose remainder is reported while its size is published only on a pricing page ([providers/command-code.md](providers/command-code.md)); and the rings where nothing at all is reported but the money — DeepSeek's three modes ([providers/deepseek.md](providers/deepseek.md)) and Xiaomi's prepaid balance against its watched peak ([providers/xiaomi-coding-plan.md](providers/xiaomi-coding-plan.md)).
+Pulse shows **figures the provider reported**. It does not invent a usage percentage from local token counts. If a provider reports no figure, the UI says so. Labelled exceptions only, and each says on screen that it is inferred: the money estimate in Settings; Command Code's monthly plan grant, whose remainder is reported while its size is published only on a pricing page ([providers/command-code.md](providers/command-code.md)); and the rings where nothing at all is reported but the money — DeepSeek's three modes ([providers/deepseek.md](providers/deepseek.md)) and 小米API's prepaid balance against its watched peak ([providers/xiaomi-api.md](providers/xiaomi-api.md)).
 
 Per-provider HTTP, cookies, and login: [providers/README.md](providers/README.md). Why percentages stay reported: [decisions/reported-figures.md](decisions/reported-figures.md).
 
@@ -30,7 +30,7 @@ Signals (every one is a reason to wait **longer**, never shorter):
 
 #### The one asymmetry: providers this Mac cannot watch
 
-Every signal above is local, which is the module's whole advantage — Pulse can see an agent working without asking anyone's server. It also means a provider billed entirely on **its own** servers is invisible to all three activity signals and lands on the ceiling every time. That is circular: it waits half an hour because nothing changed, and nothing appears to have changed because it waited half an hour. For prepaid credit draining towards zero — DeepSeek, Command Code, Xiaomi's balance — being half an hour late is the one case where it costs something.
+Every signal above is local, which is the module's whole advantage — Pulse can see an agent working without asking anyone's server. It also means a provider billed entirely on **its own** servers is invisible to all three activity signals and lands on the ceiling every time. That is circular: it waits half an hour because nothing changed, and nothing appears to have changed because it waited half an hour. For prepaid credit draining towards zero — DeepSeek, Command Code, 小米API — being half an hour late is the one case where it costs something.
 
 So `AdaptiveRefresh.interval(for:isWatched:)` caps those at `unwatchedCeiling` (300s). `Provider.spendingIsWatchedLocally` is the flag, and it is the inverse of `reportsSpendableBalance`.
 

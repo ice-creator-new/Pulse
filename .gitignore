@@ -4,6 +4,7 @@
 # Swift Package Manager
 .build/
 .swiftpm/
+.vendor/
 
 # Xcode user and build data
 DerivedData/

@@ -1218,7 +1218,7 @@ struct SettingsView: View {
             case .ollamaCloud:
                 host = "ollama.com"
                 keep = { try? OllamaSessionCookie.normalize($0) }
-            case .xiaomiMiMo:
+            case .xiaomiMiMo, .xiaomiAPI:
                 host = XiaomiMiMoClient.host
                 keep = { try? XiaomiMiMoCookie.normalize($0) }
             case .claudeCode, .codex, .kiro, .antigravity, .cursor, .openCodeGo,
@@ -1251,7 +1251,7 @@ struct SettingsView: View {
                 // exhaustive: a shared sentence would send somebody to the
                 // wrong site.
                 sessionMessage = switch account.provider {
-                case .xiaomiMiMo:
+                case .xiaomiMiMo, .xiaomiAPI:
                     String.localized("No Xiaomi session found. Sign in at platform.xiaomimimo.com first.")
                 default:
                     String.localized("No Ollama session found. Sign in at ollama.com first.")

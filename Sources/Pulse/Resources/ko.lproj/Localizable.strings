@@ -584,6 +584,7 @@
 "Sign in to Xiaomi's platform in a browser to see usage." = "브라우저에서 Xiaomi 플랫폼에 로그인하면 사용량이 표시됩니다.";
 "Xiaomi's saved session expired. Sign in again in your browser." = "Xiaomi의 저장된 세션이 만료되었습니다. 브라우저에서 다시 로그인하세요.";
 "No Coding Plan on this Xiaomi account." = "이 Xiaomi 계정에는 Coding Plan이 없습니다.";
+"No prepaid balance on this Xiaomi account." = "이 Xiaomi 계정에는 선불 잔액이 없습니다.";
 "Reads the console with your signed-in browser session." = "로그인된 브라우저 세션으로 콘솔을 읽습니다.";
 
 /* 네트워크 프록시 */
