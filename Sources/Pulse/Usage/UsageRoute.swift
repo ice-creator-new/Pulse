@@ -34,11 +34,12 @@ enum UsageRoute: String, Codable, Sendable {
         switch account.provider {
         case .claudeCode, .codex, .volcengine, .devin: return nil
         case .antigravity: return .languageServer
-        // Both read a signed-in browser session rather than a key.
-        case .ollamaCloud, .xiaomiMiMo, .xiaomiAPI: return .webSession
+        // All four read a signed-in browser session rather than a key.
+        case .ollamaCloud, .xiaomiMiMo, .xiaomiAPI, .qoder: return .webSession
         case .kiro: return .kiroACP
         case .cursor, .openCodeGo, .kimiCode, .zai, .glmCoding, .minimax,
-             .minimaxCN, .copilot, .grok, .grokBot, .commandCode, .deepSeek:
+             .minimaxCN, .copilot, .grok, .grokBot, .commandCode, .deepSeek,
+             .sub2api, .newAPI, .v2ex:
             return .endpoint
         }
     }

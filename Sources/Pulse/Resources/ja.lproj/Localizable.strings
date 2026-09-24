@@ -7,6 +7,12 @@
 "Panel" = "パネル";
 "Application" = "アプリケーション";
 "General" = "一般";
+"Appearance" = "外観";
+"Rings and figures" = "リングと数値";
+"Position and behavior" = "位置と動作";
+"Network and refresh" = "ネットワークと更新";
+"Figures" = "数値";
+"Rings" = "リング";
 "Providers" = "プロバイダ";
 "About" = "このアプリについて";
 
@@ -85,6 +91,11 @@
 "Percentages at the side" = "横にパーセントを表示";
 "The figure under each ring, docked left or right." = "左右に寄せているとき、各リングの下に数値を表示します。";
 "Time until reset" = "リセットまでの時間";
+"A second arc outside each ring, showing progress through the current window." = "各リングの外側に、現在の期間の時間経過を示すリングを表示します。";
+"Time ring direction" = "時間リングの方向";
+"Choose whether the outer arc fills with elapsed time or empties with time remaining." = "外側のリングを経過時間で満たすか、残り時間で減らすかを選択します。";
+"Elapsed" = "経過";
+"Remaining" = "残り";
 "Animated mark" = "アニメーションマーク";
 "Bot personality" = "ボットの性格";
 "Bot shape" = "ボットの形";
@@ -121,7 +132,6 @@
 "Stoic" = "むひょう";
 "Proud" = "どうどう";
 "Draw a bot that reacts to this account instead of the provider's logo." = "プロバイダのロゴの代わりに、このアカウントの状態に反応するボットを表示します。";
-"A second arc outside each ring, for how much of the window has passed." = "リングの外側にもう一本の弧を描き、今の期間がどれだけ過ぎたかを示します。";
 "Figure above the ring" = "数値をリングの上に";
 "Show what's left" = "残りを表示";
 "Forecast" = "使い切り予測";
@@ -285,7 +295,9 @@
 
 /* Liquid Glass */
 "Liquid Glass" = "Liquid Glass";
-"Frosted glass instead of solid black." = "真っ黒ではなく、すりガラス調の素材にします。";
+"Clear glass that shows what is behind the panel, instead of solid black." = "真っ黒ではなく、背後の内容が透けて見えるガラスにします。";
+"Transparency" = "透明度";
+"Clearer to the right. Darker reads better over bright pages." = "右ほど透明になります。暗めにすると、明るいページの上でも読みやすくなります。";
 "Drag it by a ring while this is on." = "オンのあいだはリングをつかんでドラッグします。";
 "Open Antigravity to see its usage." = "使用量を読むには Antigravity を開いてください。";
 "Asks the language server Antigravity runs while it is open." = "Antigravity が起動中に走らせている language server に問い合わせます。";
@@ -632,3 +644,22 @@
 "Uses a browser session you import in Settings. Importing may ask for browser Keychain access." = "設定で読み込んだブラウザのログインセッションを使います。読み込み時にブラウザのキーチェーンへのアクセスを求めることがあります。";
 "Uses the GitHub login you connect in Settings. No Keychain prompt." = "設定で連携した GitHub のログインを使います。キーチェーンの確認はありません。";
 "Uses only the API key you enter in Settings. No Keychain prompt." = "設定で入力した API キーだけを使います。キーチェーンの確認はありません。";
+"Top-up pack" = "追加パック";
+"Server address" = "サーバーのアドレス";
+"Edit address" = "アドレスを編集";
+"Add the server address in Settings." = "設定でサーバーのアドレスを入力してください。";
+"That address can't be used. It needs https://, unless the server is on your own network." = "このアドレスは使えません。サーバーが自分のネットワーク内にある場合を除き、https:// が必要です。";
+"Sends the key you enter only to the server address you enter. No Keychain prompt." = "入力したキーは、入力したサーバーのアドレスにだけ送られます。キーチェーンの確認はありません。";
+"A group API key from your sub2api deployment. Sent only to the address above. Stored encrypted on this Mac." = "あなたの sub2api のグループ API キーです。上のアドレスにだけ送られます。この Mac に暗号化して保存されます。";
+"A Personal Access Token from v2ex.com. Stored encrypted on this Mac." = "v2ex.com で発行した Personal Access Token です。この Mac に暗号化して保存されます。";
+"Your own deployment's address, such as https://gateway.example.com. Pulse asks it for usage and sends nothing else." = "あなた自身のゲートウェイのアドレスです。例: https://gateway.example.com。Pulse は使用状況を尋ねるだけで、ほかには何も送りません。";
+"The same key your AI client uses for this gateway. Sent only to the address above. Stored encrypted on this Mac." = "この ゲートウェイ に AI クライアントが使っているのと同じキーです。上のアドレスにだけ送られます。この Mac に暗号化して保存されます。";
+"Credit allowance" = "クレジット枠";
+"Team credits" = "チーム共有クレジット";
+"Sign in to Qoder in a browser to see usage." = "ブラウザで Qoder にサインインすると使用量が表示されます。";
+"Qoder's saved session expired. Sign in again in your browser." = "Qoder の保存済みセッションが期限切れです。ブラウザでサインインし直してください。";
+"This Qoder account has no credits." = "この Qoder アカウントにクレジットはありません。";
+"Reads your credits with your signed-in browser session." = "サインイン済みのブラウザセッションでクレジットを読みます。";
+"No Qoder session found. Sign in at %@ first." = "Qoder のセッションが見つかりません。先に %@ でサインインしてください。";
+"Site" = "サイト";
+"Where you signed in. Changing it clears the saved session." = "サインインしたサイトです。切り替えると保存済みのセッションは消去されます。";

@@ -144,9 +144,13 @@ actor UsageCache {
         // nothing to come back to: showing yesterday's percentages for up to a
         // day, while Settings holds an empty field, hides the one thing the
         // user needs told. Reported as it is.
+        // A gateway with no usable address is the same case: there is no
+        // server to have a reading from. So is a Qoder session discarded
+        // because the site changed: what is banked is the other site's.
         if case .unavailable(let reason) = fetched.state,
-           [.apiKeyMissing, .ollamaSessionMissing, .signedOut,
-            .claudeDesktopNotSignedIn, .claudeDesktopKeyRefused].contains(reason) {
+           [.apiKeyMissing, .ollamaSessionMissing, .qoderSessionMissing, .signedOut,
+            .claudeDesktopNotSignedIn, .claudeDesktopKeyRefused,
+            .serverAddressMissing, .serverAddressRefused].contains(reason) {
             return fetched
         }
 

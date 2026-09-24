@@ -409,6 +409,7 @@ final class UsageStore {
         let ollama = OllamaCloudUsageService(cookie: apiKeys[.ollamaCloud])
         let xiaomi = XiaomiMiMoUsageService(cookie: apiKeys[.xiaomiMiMo])
         let xiaomiAPI = XiaomiAPIUsageService(cookie: apiKeys[.xiaomiAPI])
+        let qoder = QoderUsageService(cookie: apiKeys[.qoder], site: settings.qoderSite)
         let zai = ZaiUsageService(provider: .zai, enteredKey: apiKeys[.zai])
         let glm = ZaiUsageService(provider: .glmCoding, enteredKey: apiKeys[.glmCoding])
         let minimax = MiniMaxUsageService(provider: .minimax, enteredKey: apiKeys[.minimax])
@@ -428,6 +429,15 @@ final class UsageStore {
             budget: settings.deepSeekBudget,
             currency: settings.deepSeekCurrency
         )
+        let sub2api = Sub2APIUsageService(
+            enteredKey: apiKeys[.sub2api],
+            address: settings.serverAddress(for: AccountKey(.sub2api))
+        )
+        let newAPI = NewAPIUsageService(
+            enteredKey: apiKeys[.newAPI],
+            address: settings.serverAddress(for: AccountKey(.newAPI))
+        )
+        let v2ex = V2EXUsageService(enteredKey: apiKeys[.v2ex])
         // Nothing is fetched for a provider that isn't on the rail: it would
         // spend someone else's request, and read a credential, for a figure
         // nobody is going to see.
@@ -516,6 +526,18 @@ final class UsageStore {
             async let devinUsage = wanted.contains(.devin)
                 ? await devin.fetch(source: devinSource)
                 : ProviderUsage.unavailable(.devin, reason: .loading)
+            async let sub2apiUsage = wanted.contains(.sub2api)
+                ? await sub2api.fetch()
+                : ProviderUsage.unavailable(.sub2api, reason: .loading)
+            async let newAPIUsage = wanted.contains(.newAPI)
+                ? await newAPI.fetch()
+                : ProviderUsage.unavailable(.newAPI, reason: .loading)
+            async let v2exUsage = wanted.contains(.v2ex)
+                ? await v2ex.fetch()
+                : ProviderUsage.unavailable(.v2ex, reason: .loading)
+            async let qoderUsage = wanted.contains(.qoder)
+                ? await qoder.fetch()
+                : ProviderUsage.unavailable(.qoder, reason: .loading)
 
             let (rawCodex, rawKiro, rawClaude, rawAntigravity, rawOpenCode) =
                 await (codexUsage, kiroUsage, claudeUsage, antigravityUsage, openCodeUsage)
@@ -525,7 +547,8 @@ final class UsageStore {
             let (rawCopilot, rawGrok, rawGrokBot) = await (copilotUsage, grokUsage, grokBotUsage)
             let (rawVolcengine, rawCommandCode) = await (volcengineUsage, commandCodeUsage)
             let (rawDeepSeek, rawDevin) = await (deepSeekUsage, devinUsage)
-            let rawXiaomi = await xiaomiUsage
+            let (rawSub2API, rawNewAPI, rawV2EX) = await (sub2apiUsage, newAPIUsage, v2exUsage)
+            let (rawXiaomi, rawQoder) = await (xiaomiUsage, qoderUsage)
             let rawXiaomiAPI = await xiaomiAPIUsage
 
             // **The disowning is checked before anything is written, not just
@@ -569,6 +592,10 @@ final class UsageStore {
                 (.devin, rawDevin),
                 (.xiaomiMiMo, rawXiaomi),
                 (.xiaomiAPI, rawXiaomiAPI),
+                (.sub2api, rawSub2API),
+                (.newAPI, rawNewAPI),
+                (.v2ex, rawV2EX),
+                (.qoder, rawQoder),
             ] where wanted.contains(provider) {
                 results.append(BatchResult(
                     provider: provider,
@@ -668,6 +695,7 @@ final class UsageStore {
         let ollama = OllamaCloudUsageService(cookie: key)
         let xiaomi = XiaomiMiMoUsageService(cookie: key)
         let xiaomiAPI = XiaomiAPIUsageService(cookie: key)
+        let qoder = QoderUsageService(cookie: key, site: settings.qoderSite)
         let zai = ZaiUsageService(provider: provider, enteredKey: key)
         let minimax = MiniMaxUsageService(provider: provider, enteredKey: key)
         let volcengine = VolcengineUsageService(enteredKey: key)
@@ -682,6 +710,13 @@ final class UsageStore {
             budget: settings.deepSeekBudget,
             currency: settings.deepSeekCurrency
         )
+        let sub2api = Sub2APIUsageService(
+            enteredKey: key, address: settings.serverAddress(for: account)
+        )
+        let newAPI = NewAPIUsageService(
+            enteredKey: key, address: settings.serverAddress(for: account)
+        )
+        let v2ex = V2EXUsageService(enteredKey: key)
 
         Task { [codex, claudeCode, antigravity, cursor, grok, grokBot] in
             let raw: ProviderUsage
@@ -727,6 +762,14 @@ final class UsageStore {
                 raw = await xiaomi.fetch()
             case .xiaomiAPI:
                 raw = await xiaomiAPI.fetch()
+            case .sub2api:
+                raw = await sub2api.fetch()
+            case .newAPI:
+                raw = await newAPI.fetch()
+            case .v2ex:
+                raw = await v2ex.fetch()
+            case .qoder:
+                raw = await qoder.fetch()
             }
             }
 
@@ -799,7 +842,8 @@ final class UsageStore {
         // Nothing else can be signed in to, so nothing else gets here.
         case .kiro, .antigravity, .cursor, .openCodeGo, .kimiCode, .ollamaCloud,
              .zai, .glmCoding, .minimax, .minimaxCN, .copilot, .volcengine,
-             .commandCode, .deepSeek, .devin, .xiaomiMiMo, .xiaomiAPI:
+             .commandCode, .deepSeek, .devin, .xiaomiMiMo, .xiaomiAPI, .sub2api, .newAPI,
+             .v2ex, .qoder:
             .unavailable(account, reason: .loading)
         }
     }

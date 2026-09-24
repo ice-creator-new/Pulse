@@ -7,6 +7,44 @@ shows in the update window — see [Scripts/changelog.py](Scripts/changelog.py).
 Add the entry **before** tagging, in the small grammar the converter knows:
 bullets, `**bold**`, `` `code` `` and `[links](https://example.com)`.
 
+## 1.4.0
+
+**中文**
+
+**新功能**
+
+- **新增 Sub2API、New API、V2EX 和 Qoder，服务商增至二十四个。** 两个自建网关填入服务器地址和密钥即可读取余额或额度；V2EX 使用个人访问令牌读取 AI Chat 额度；Qoder 从浏览器读取 qoder.com 或 qoder.com.cn 的登录，显示积分额度，团队套餐的共享积分单独一个圆环。感谢 [@momusticks](https://github.com/qunqin24/Pulse/issues/59) 提议。
+- **真正的液态玻璃。** 开启后面板是透明、带折射的 macOS 26 液态玻璃，不再是一层磨砂；文字改为白色，并新增「透明度」滑块，可按常用背景调节玻璃明暗。设置中的名称也改回「液态玻璃」。
+- **时间圆环可以倒数。** 「距离重置的时间」的外圈可选「已过去」或「剩余」，剩余模式从满圈逐渐缩短到重置。感谢 [@Steven-oyjb](https://github.com/qunqin24/Pulse/pull/44)。
+- **Kiro 与 ZCode 也会显示工作动画。** Pulse 读取它们在本机写下的会话记录判断任务是否进行中；ZCode 只在配置的接口属于智谱或 z.ai 时才驱动对应圆环。感谢 [@guanbear](https://github.com/qunqin24/Pulse/pull/56)。
+- **设置按主题拆分成多个页面。** 外观、圆环与数字、位置与行为、通用、通知、网络与刷新各自独立；侧边栏搜索也能按设置项名称找到所在页面。
+- **每个服务都有配置指南。** 设置里的「配置帮助」现在打开专门写给用户的页面：密钥或登录从哪里获取、填到哪里、常见报错怎么处理。
+
+**改进与修复**
+
+- **贴边时鼠标推到屏幕最边缘不再误判离开。** 之前开启自动收起时，指针贴着边缘会让胶囊反复展开又收起。
+- **切换卡片更顺滑。** 高度不同的卡片之间切换时，新增的一行不再先于卡片出现在外面；快速扫过圆环时也不会看到空卡片。
+- **小机器人不再偶尔瞬移。** 庆祝转圈或变形动作被中途打断时，身体会平滑过渡，不再在一帧内跳转。
+- **Token 消耗：同名项目分开统计，无定价用量不再显示 $0.00。** 不同路径下的同名目录不再合并成一行；无法定价的会话和项目显示「—」或带 `*` 的小计。感谢 [@tech-zjf](https://github.com/qunqin24/Pulse/pull/57)（[#58](https://github.com/qunqin24/Pulse/pull/58)）。
+
+**English**
+
+**New**
+
+- **Sub2API, New API, V2EX and Qoder bring the count to twenty-four providers.** Both self-hosted gateways read a balance or allowance from a server address and key you enter; V2EX reads its AI Chat allowance with a Personal Access Token; Qoder reads your qoder.com or qoder.com.cn sign-in from the browser and shows your credits, with a team plan's shared credits as a ring of their own. Thanks to [@momusticks](https://github.com/qunqin24/Pulse/issues/59) for asking.
+- **Real Liquid Glass.** With glass on, the panel is clear, refracting macOS 26 Liquid Glass rather than a frosted layer. Text is drawn white, and a new **Transparency** slider sets how much the glass is dimmed for the backgrounds you usually work over. The setting is called Liquid Glass again in every language.
+- **The window clock can count down.** The outer arc of **Time until reset** can show time elapsed or time remaining; remaining starts full and empties toward the reset. Thanks to [@Steven-oyjb](https://github.com/qunqin24/Pulse/pull/44).
+- **Kiro and ZCode show activity too.** Pulse reads the session records they leave on this Mac to tell whether a turn is in flight; ZCode drives a ring only when its configured endpoint belongs to Zhipu or z.ai. Thanks to [@guanbear](https://github.com/qunqin24/Pulse/pull/56).
+- **Settings are split by subject.** Appearance, Rings and figures, Position and behavior, General, Notifications, and Network and refresh each have their own pane, and the sidebar search finds a pane by the names of its settings.
+- **Every provider has a setup guide.** **Setup help** now opens a page written for users: where the key or login comes from, where it goes in Pulse, and what each error means.
+
+**Changed and fixed**
+
+- **A pointer pushed against the screen edge no longer counts as leaving a docked rail.** With auto-collapse on, it used to open and close the rail over and over.
+- **Switching cards is smoother.** An added row no longer appears outside a card that has not grown yet, and sweeping across the rings no longer shows an empty card.
+- **The animated mark no longer jumps.** A celebration spin or a shape change interrupted mid-motion now eases into the next state instead of snapping in one frame.
+- **Token spend keeps same-name projects apart and stops showing unpriced use as $0.00.** Directories with the same name at different paths are no longer merged, and sessions or projects that cannot be priced show `—` or a subtotal marked `*`. Thanks to [@tech-zjf](https://github.com/qunqin24/Pulse/pull/57) ([#58](https://github.com/qunqin24/Pulse/pull/58)).
+
 ## 1.3.1
 
 **中文**
