@@ -52,6 +52,8 @@ accounts[]
     estimated          true when the denominator was inferred, not reported
     estimatedFrom      which inference: planPrice | sinceTopUp | yourBudget
     resetsAt
+    expiresAt          when part of the allowance lapses (not a reset); Qoder and StepFun
+    expiringAmount     how much lapses then, in the allowance's own unit
 ```
 
 `headline` repeats a window from `windows` on purpose: the common case is one number in a status line, and making every consumer re-implement "which limit matters" — the fullest, unless one is pinned — is how they end up disagreeing with the ring.

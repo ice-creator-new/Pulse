@@ -410,6 +410,7 @@ final class UsageStore {
         let xiaomi = XiaomiMiMoUsageService(cookie: apiKeys[.xiaomiMiMo])
         let xiaomiAPI = XiaomiAPIUsageService(cookie: apiKeys[.xiaomiAPI])
         let qoder = QoderUsageService(cookie: apiKeys[.qoder], site: settings.qoderSite)
+        let stepFun = StepFunUsageService(cookie: apiKeys[.stepFun], site: settings.stepFunSite)
         let zai = ZaiUsageService(provider: .zai, enteredKey: apiKeys[.zai])
         let glm = ZaiUsageService(provider: .glmCoding, enteredKey: apiKeys[.glmCoding])
         let minimax = MiniMaxUsageService(provider: .minimax, enteredKey: apiKeys[.minimax])
@@ -538,6 +539,9 @@ final class UsageStore {
             async let qoderUsage = wanted.contains(.qoder)
                 ? await qoder.fetch()
                 : ProviderUsage.unavailable(.qoder, reason: .loading)
+            async let stepFunUsage = wanted.contains(.stepFun)
+                ? await stepFun.fetch()
+                : ProviderUsage.unavailable(.stepFun, reason: .loading)
 
             let (rawCodex, rawKiro, rawClaude, rawAntigravity, rawOpenCode) =
                 await (codexUsage, kiroUsage, claudeUsage, antigravityUsage, openCodeUsage)
@@ -548,7 +552,7 @@ final class UsageStore {
             let (rawVolcengine, rawCommandCode) = await (volcengineUsage, commandCodeUsage)
             let (rawDeepSeek, rawDevin) = await (deepSeekUsage, devinUsage)
             let (rawSub2API, rawNewAPI, rawV2EX) = await (sub2apiUsage, newAPIUsage, v2exUsage)
-            let (rawXiaomi, rawQoder) = await (xiaomiUsage, qoderUsage)
+            let (rawXiaomi, rawQoder, rawStepFun) = await (xiaomiUsage, qoderUsage, stepFunUsage)
             let rawXiaomiAPI = await xiaomiAPIUsage
 
             // **The disowning is checked before anything is written, not just
@@ -596,6 +600,7 @@ final class UsageStore {
                 (.newAPI, rawNewAPI),
                 (.v2ex, rawV2EX),
                 (.qoder, rawQoder),
+                (.stepFun, rawStepFun),
             ] where wanted.contains(provider) {
                 results.append(BatchResult(
                     provider: provider,
@@ -696,6 +701,7 @@ final class UsageStore {
         let xiaomi = XiaomiMiMoUsageService(cookie: key)
         let xiaomiAPI = XiaomiAPIUsageService(cookie: key)
         let qoder = QoderUsageService(cookie: key, site: settings.qoderSite)
+        let stepFun = StepFunUsageService(cookie: key, site: settings.stepFunSite)
         let zai = ZaiUsageService(provider: provider, enteredKey: key)
         let minimax = MiniMaxUsageService(provider: provider, enteredKey: key)
         let volcengine = VolcengineUsageService(enteredKey: key)
@@ -770,6 +776,8 @@ final class UsageStore {
                 raw = await v2ex.fetch()
             case .qoder:
                 raw = await qoder.fetch()
+            case .stepFun:
+                raw = await stepFun.fetch()
             }
             }
 
@@ -842,8 +850,8 @@ final class UsageStore {
         // Nothing else can be signed in to, so nothing else gets here.
         case .kiro, .antigravity, .cursor, .openCodeGo, .kimiCode, .ollamaCloud,
              .zai, .glmCoding, .minimax, .minimaxCN, .copilot, .volcengine,
-             .commandCode, .deepSeek, .devin, .xiaomiMiMo, .xiaomiAPI, .sub2api, .newAPI,
-             .v2ex, .qoder:
+             .commandCode, .deepSeek, .devin, .xiaomiMiMo, .xiaomiAPI, .sub2api,
+             .newAPI, .v2ex, .qoder, .stepFun:
             .unavailable(account, reason: .loading)
         }
     }

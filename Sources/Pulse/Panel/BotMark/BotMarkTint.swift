@@ -47,6 +47,8 @@ enum BotMarkTint {
         // Qoder body inside a green ring reads as one blob, this is the line
         // to change.
         case .qoder: BotMarkPalette.rgb(0x2ADB5C)
+        // StepFun's mark is a blue gradient; the deep end is the colour.
+        case .stepFun: BotMarkPalette.rgb(0x0160FF)
         // V2EX draws a light arrow on near-black and has no other colour.
         // New API's own mark is a cyan-to-pink pair; neither end is the
         // colour, so it takes one of Pulse's own rather than half a gradient.

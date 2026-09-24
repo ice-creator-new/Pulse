@@ -134,6 +134,18 @@ final class AppSettings {
         }
     }
 
+    /// Which StepFun site the saved session belongs to: `platform.stepfun.com`
+    /// or `platform.stepfun.ai`, two sign-ins on two hosts. The same rules as
+    /// `qoderSite`: it decides where cookies are read from and where the
+    /// request goes, and changing it discards the saved session.
+    var stepFunSite: StepFunSite {
+        didSet {
+            guard stepFunSite != oldValue else { return }
+            UserDefaults.standard.set(stepFunSite.rawValue, forKey: Key.stepFunSite)
+            onChange?()
+        }
+    }
+
     /// Where Pulse sends a self-hosted gateway's request, per account.
     ///
     /// sub2api and New API are somebody's own deployments, so unlike every
@@ -1014,6 +1026,7 @@ final class AppSettings {
         deepSeekBudget: Double? = nil,
         deepSeekCurrency: String? = nil,
         qoderSite: QoderSite = .international,
+        stepFunSite: StepFunSite = .china,
         serverAddresses: [String: String] = [:],
         lowBalanceAlerts: [String: Double] = [:],
         showsBalanceAmounts: [String: Bool] = [:],
@@ -1065,6 +1078,7 @@ final class AppSettings {
         self.deepSeekBudget = deepSeekBudget
         self.deepSeekCurrency = deepSeekCurrency
         self.qoderSite = qoderSite
+        self.stepFunSite = stepFunSite
         self.serverAddresses = serverAddresses
         self.lowBalanceAlerts = lowBalanceAlerts
         self.showsBalanceAmounts = showsBalanceAmounts
@@ -1360,6 +1374,8 @@ final class AppSettings {
             deepSeekCurrency: defaults.string(forKey: Key.deepSeekCurrency),
             qoderSite: defaults.string(forKey: Key.qoderSite)
                 .flatMap(QoderSite.init(rawValue:)) ?? .international,
+            stepFunSite: defaults.string(forKey: Key.stepFunSite)
+                .flatMap(StepFunSite.init(rawValue:)) ?? .china,
             serverAddresses: defaults.dictionary(forKey: Key.serverAddresses) as? [String: String] ?? [:],
             lowBalanceAlerts: defaults.dictionary(forKey: Key.lowBalanceAlerts) as? [String: Double] ?? [:],
             showsBalanceAmounts: Self.storedShowsBalanceAmounts(in: defaults),
@@ -1490,6 +1506,7 @@ final class AppSettings {
         static let deepSeekBudget = "settings.deepSeekBudget"
         static let deepSeekCurrency = "settings.deepSeekCurrency"
         static let qoderSite = "settings.qoderSite"
+        static let stepFunSite = "settings.stepFunSite"
         static let serverAddresses = "settings.serverAddresses"
         static let lowBalanceAlerts = "settings.lowBalanceAlerts"
         static let showsBalanceAmounts = "settings.showsBalanceAmounts"

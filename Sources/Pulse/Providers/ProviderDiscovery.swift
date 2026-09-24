@@ -39,6 +39,10 @@ extension Provider {
         // browser's session for the account page, not anything the app keeps.
         case .qoder:
             return ["Qoder", "QoderCN"].map { local("Library/Application Support/\($0)") } + app("Qoder")
+        // StepFun's own coding CLI, Step Code. A hint only: what is read is the
+        // console's browser session, not the CLI's saved credential.
+        case .stepFun:
+            return [local(".stepcode")]
         // sub2api is somebody's own deployment and V2EX is a website; there
         // is nothing on this Mac that says either is in use.
         case .kimiCode, .ollamaCloud, .zai, .minimax, .minimaxCN, .copilot,

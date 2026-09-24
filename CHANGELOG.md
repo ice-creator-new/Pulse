@@ -7,6 +7,38 @@ shows in the update window — see [Scripts/changelog.py](Scripts/changelog.py).
 Add the entry **before** tagging, in the small grammar the converter knows:
 bullets, `**bold**`, `` `code` `` and `[links](https://example.com)`.
 
+## 1.4.1
+
+**中文**
+
+**新功能**
+
+- **Qoder 显示积分包的到期日。** 每个积分包有自己的到期时间，卡片会显示最早到期的那批，例如「10月18日 86 积分到期」，同一天到期的合并计算；`--json` 也新增了 `expiresAt` 和 `expiringAmount`。感谢 [@momusticks](https://github.com/qunqin24/Pulse/issues/59) 提议。
+
+**改进与修复**
+
+- **Qoder 体验版账号不再显示「未返回任何限额」。** 大陆站体验版会返回一个早已过去的重置时间，Pulse 据此把整份读数当作过期丢掉了；现在忽略这个日期，照常显示剩余积分。感谢 [@momusticks](https://github.com/qunqin24/Pulse/issues/59) 查清原因。
+- **购买 Qoder 积分包不再被当成额度重置。** 买包后上限变大、用量比例骤降，之前会误发重置通知，小机器人也会庆祝；现在只有 Qoder 的重置时间往后推才算重置。
+- **Qoder 确认账号没有积分时，不再显示旧的百分比。** 之前缓存会把上一次的读数顶回来，重启后和 `--json` 里也是。感谢 [@tech-zjf](https://github.com/qunqin24/Pulse/pull/61)。
+- **模型价格不用重启也会更新。** 价格表过期后，下次读取时重新下载；下载失败就继续用旧表，五分钟后可再试。感谢 [@tech-zjf](https://github.com/qunqin24/Pulse/pull/60)。
+- **小机器人的眼神和动作恢复原版幅度。** 之前为了让眼睛不贴边、身体不出圆环，Pulse 额外压缩了眼神、手势和大幅动作，摇头只剩一半幅度；现在按原版动画播放，动作大时眼睛可能贴着边缘，头顶可能短暂超出圆环。
+- **鼠标移上胶囊时，小机器人依次转过去看。** 不再所有圆环在同一帧齐刷刷转向指针；每个各自晚一点注意到，约 0.4 秒平滑转过去。
+
+**English**
+
+**New**
+
+- **Qoder shows when your credit packs lapse.** Each pack has its own end date; the card now shows the soonest, such as "Oct 18: 86 credits expire", with packs ending the same day added together. `--json` gains `expiresAt` and `expiringAmount`. Thanks to [@momusticks](https://github.com/qunqin24/Pulse/issues/59) for asking.
+
+**Changed and fixed**
+
+- **A Qoder trial no longer shows "no limits reported".** The mainland site's trial replies with a reset date long past, and Pulse discarded the whole reading as expired. The date is now ignored and the remaining credits are shown. Thanks to [@momusticks](https://github.com/qunqin24/Pulse/issues/59) for tracking down the cause.
+- **Buying a Qoder pack is no longer read as a reset.** The larger limit made the used fraction drop, which sent a reset notification and set the bot celebrating. Only Qoder's reset date moving forward counts now.
+- **An old percentage no longer covers Qoder saying an account has no credits.** The cache brought the previous reading back, after relaunch and in `--json` too. Thanks to [@tech-zjf](https://github.com/qunqin24/Pulse/pull/61).
+- **Model prices refresh without restarting Pulse.** An expired price table is downloaded again on the next read; a failed download keeps the old one and may retry after five minutes. Thanks to [@tech-zjf](https://github.com/qunqin24/Pulse/pull/60).
+- **The bot moves as the original animation does.** Pulse had been damping its glances, gestures and larger moves to keep the eyes off the edge and the body inside the ring, so a head shake lost half its sweep. They play at full size again: an eye may touch the edge, and the top of the head may briefly leave the ring.
+- **The bots turn to an arriving pointer one after another.** Instead of every ring snapping to it in the same frame, each notices a moment later and turns over about 0.4 seconds.
+
 ## 1.4.0
 
 **中文**

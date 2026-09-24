@@ -34,6 +34,7 @@ enum Provider: String, CaseIterable, Identifiable, Codable, Sendable {
     case newAPI
     case v2ex
     case qoder
+    case stepFun
 
     var id: String { rawValue }
 
@@ -122,6 +123,10 @@ enum Provider: String, CaseIterable, Identifiable, Codable, Sendable {
         // one name, and the site is a setting of the account rather than a
         // second thing somebody subscribes to (`QoderSite`).
         case .qoder: "Qoder"
+        // The company's name, as its console writes it. The plan is "Step
+        // Plan", but a ring named for the plan alone says nothing about whose
+        // it is, and the company sells nothing else Pulse could mean.
+        case .stepFun: "StepFun"
         }
     }
 
@@ -178,6 +183,7 @@ enum Provider: String, CaseIterable, Identifiable, Codable, Sendable {
         case .newAPI: "newapi"
         case .v2ex: "v2ex"
         case .qoder: "qoder"
+        case .stepFun: "stepfun"
         }
     }
 
@@ -197,8 +203,8 @@ enum Provider: String, CaseIterable, Identifiable, Codable, Sendable {
         // which is true today and better than a column of zeroes.
         case .kiro, .antigravity, .cursor, .openCodeGo, .kimiCode, .ollamaCloud,
              .zai, .glmCoding, .minimax, .minimaxCN, .copilot, .grok, .grokBot,
-             .volcengine, .commandCode, .deepSeek, .devin, .xiaomiMiMo, .xiaomiAPI, .sub2api,
-             .newAPI, .v2ex, .qoder: false
+             .volcengine, .commandCode, .deepSeek, .devin, .xiaomiMiMo, .xiaomiAPI,
+             .sub2api, .newAPI, .v2ex, .qoder, .stepFun: false
         }
     }
 
@@ -212,7 +218,7 @@ enum Provider: String, CaseIterable, Identifiable, Codable, Sendable {
         case .antigravity, .cursor, .openCodeGo, .kimiCode, .ollamaCloud,
              .minimax, .minimaxCN, .copilot, .grok, .grokBot, .volcengine,
              .commandCode, .deepSeek, .devin, .xiaomiMiMo, .xiaomiAPI,
-             .sub2api, .newAPI, .v2ex, .qoder: false
+             .sub2api, .newAPI, .v2ex, .qoder, .stepFun: false
         }
     }
 
@@ -259,7 +265,8 @@ enum Provider: String, CaseIterable, Identifiable, Codable, Sendable {
         case .claudeCode, .codex, .volcengine, .devin: true
         case .kiro, .antigravity, .cursor, .openCodeGo, .kimiCode, .ollamaCloud,
              .zai, .glmCoding, .minimax, .minimaxCN, .copilot, .grok, .grokBot,
-             .commandCode, .deepSeek, .xiaomiMiMo, .xiaomiAPI, .sub2api, .newAPI, .v2ex, .qoder: false
+             .commandCode, .deepSeek, .xiaomiMiMo, .xiaomiAPI, .sub2api, .newAPI,
+             .v2ex, .qoder, .stepFun: false
         }
     }
 
@@ -298,7 +305,8 @@ enum Provider: String, CaseIterable, Identifiable, Codable, Sendable {
         // about elsewhere, so there is nothing here to state.
         case .claudeCode, .codex, .openCodeGo, .kimiCode, .ollamaCloud,
              .zai, .glmCoding, .minimax, .minimaxCN, .copilot, .volcengine,
-             .commandCode, .deepSeek, .devin, .xiaomiMiMo, .xiaomiAPI, .sub2api, .newAPI, .v2ex, .qoder:
+             .commandCode, .deepSeek, .devin, .xiaomiMiMo, .xiaomiAPI, .sub2api,
+             .newAPI, .v2ex, .qoder, .stepFun:
             nil
         }
     }
@@ -311,7 +319,7 @@ enum Provider: String, CaseIterable, Identifiable, Codable, Sendable {
     var usesAPIKey: Bool {
         [.openCodeGo, .kimiCode, .ollamaCloud, .zai, .glmCoding, .minimax, .minimaxCN, .volcengine,
          .commandCode, .deepSeek, .devin, .xiaomiMiMo, .xiaomiAPI, .sub2api, .newAPI,
-         .v2ex, .qoder].contains(self)
+         .v2ex, .qoder, .stepFun].contains(self)
     }
 
     /// Whether this Mac can see the thing this provider is billing for.
@@ -387,9 +395,12 @@ enum Provider: String, CaseIterable, Identifiable, Codable, Sendable {
     /// Xiaomi's two rows join it for the same reason: the platform's API keys
     /// buy inference and answer none of the console's account routes, so the
     /// plan and the balance are behind the web session and nothing else.
-    /// Qoder is the fourth: it publishes no usage API at all, and its account
-    /// page reads its credits with the signed-in session.
-    var usesSessionCookie: Bool { [.ollamaCloud, .xiaomiMiMo, .xiaomiAPI, .qoder].contains(self) }
+    /// Qoder and StepFun join for the same shape of reason: their API keys buy
+    /// inference, and the allowance is only on the console, behind the
+    /// signed-in session.
+    var usesSessionCookie: Bool {
+        [.ollamaCloud, .xiaomiMiMo, .xiaomiAPI, .qoder, .stepFun].contains(self)
+    }
 
     /// Whether this provider's credential is read out of a browser rather than
     /// out of another tool's files.
